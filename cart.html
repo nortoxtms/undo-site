@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sepetim · UNDO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="cart" data-nav="">
+<div id="site-header"></div>
+
+<div class="page-hero">
+  <div class="wrap">
+    <h1>Sepetim</h1>
+    <p>Seçtiğiniz parçalar bir tık uzağınızda.</p>
+  </div>
+</div>
+
+<div class="wrap" id="cart-root">
+  <!-- empty -->
+  <div class="empty-state" id="cart-empty" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 8h12l1 12H5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+    <h3>Sepetiniz boş</h3>
+    <p>Henüz bir ürün eklemediniz. Koleksiyonu keşfedin.</p>
+    <a href="shop.html" class="btn btn-solid">Alışverişe Başla</a>
+  </div>
+
+  <!-- filled -->
+  <div class="cart-layout" id="cart-layout">
+    <div class="cart-items" id="cart-items"></div>
+    <aside class="summary">
+      <h3>Sipariş Özeti</h3>
+      <div class="promo">
+        <input type="text" placeholder="İndirim kodu">
+        <button class="btn btn-outline btn-sm" onclick="toast('Kod uygulandı (demo)')">Uygula</button>
+      </div>
+      <div id="cart-summary"></div>
+      <a href="checkout.html" class="btn btn-solid btn-block">Ödemeye Geç</a>
+      <a href="shop.html" class="btn btn-outline btn-block" style="margin-top:10px">Alışverişe Devam Et</a>
+    </aside>
+  </div>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/products.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

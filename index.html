@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UNDO — Hakiki Deri Ceket & Palto</title>
+<meta name="description" content="35 yıllık ustalık. Zamansız stil. Hakiki deriden el yapımı ceket, palto ve deri giyim koleksiyonu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="home" data-nav="">
+<div id="site-header"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <span class="eyebrow" style="color:var(--caramel)">1989'dan bu yana</span>
+      <h1>35 Yıllık Ustalık.<span class="thin">Zamansız Stil.</span></h1>
+      <p>Gerçek deri, modern tasarım. Sizinle buluşuyor.</p>
+      <div class="hero-cta">
+        <a href="shop.html" class="btn btn-solid">Alışverişe Başla</a>
+        <a href="shop.html" class="btn btn-ghost-dark">Koleksiyonları Keşfet</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="wrap" style="padding-inline:0">
+    <div class="features-grid" id="feature-strip"></div>
+  </div>
+</section>
+
+<!-- STORY BAND -->
+<section class="story">
+  <div class="story-grid">
+    <!-- SOL: video alanı — video dosyasını buraya ekle:
+         <video src="assets/VIDEO.mp4" poster="assets/hero.png" controls playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
+         Video eklendiğinde aşağıdaki play düğmesini/etiketini silebilirsin. -->
+    <div class="story-media story-video" id="story-video">
+      <button class="video-play" aria-label="Videoyu oynat" onclick="toast('Tanıtım videosu yakında eklenecek')">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <span class="video-label">Videoyu İzle · Yakında</span>
+    </div>
+    <!-- SAĞ: metin + mühür görseli (arka planda) -->
+    <div class="story-copy story-seal reveal">
+      <span class="eyebrow" style="color:var(--caramel)">Ustalığın Hikayesi</span>
+      <h2>Her dikişte bir hikaye,<br><em>her üründe bir iz.</em></h2>
+      <p>1989'dan bu yana en kaliteli derileri ustalıkla şekillendiriyor, zamana meydan okuyan ürünler tasarlıyoruz. Çünkü bizim için deri sadece bir malzeme değil, bir mirastır.</p>
+      <p>Kullandıkça yumuşayan, size özel bir patina kazanan parçalar üretiyoruz — bir sezonluk değil, bir ömürlük.</p>
+      <a href="about.html" class="btn btn-ghost-dark">Hakkımızda</a>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Kategoriler</span>
+      <h2>Ne Ararsanız Bulun</h2>
+      <p>Kadın ve erkek için hakiki deriden özenle seçilmiş koleksiyonlar.</p>
+    </div>
+    <div class="cat-grid reveal" id="home-cats"></div>
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Öne Çıkanlar</span>
+      <h2>Sezonun Favorileri</h2>
+      <p>En çok tercih edilen, zamansız parçalar.</p>
+    </div>
+    <div class="product-grid cols-4 reveal" id="home-products"></div>
+    <div class="center" style="margin-top:48px">
+      <a href="shop.html" class="btn btn-outline">Tüm Ürünleri Gör</a>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="section news news-photo">
+  <div class="wrap">
+    <div class="news-inner reveal">
+      <span class="eyebrow">Bültenimize Katılın</span>
+      <h2>Yeni Sezondan İlk Siz Haberdar Olun</h2>
+      <p>Yeni koleksiyonlar, özel indirimler ve deri bakım ipuçları için abone olun. İlk siparişinizde %10 indirim.</p>
+      <form class="news-form" onsubmit="event.preventDefault(); this.reset(); toast('Teşekkürler! Aboneliğiniz alındı.');">
+        <input type="email" placeholder="E-posta adresiniz" required>
+        <button class="btn btn-solid" type="submit">Abone Ol</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="js/products.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+<script>
+  // hero görseli
+  document.getElementById("hero-bg").innerHTML = `<img src="${ASSETS.hero}" alt="">`;
+  // feature strip
+  document.getElementById("feature-strip").innerHTML = [
+    [IC.scissors,"35 Yıllık Deneyim","Kaliteden ödün vermeyen usta işçilik."],
+    [IC.leather,"%100 Gerçek Deri","En kaliteli, doğal ve dayanıklı malzeme."],
+    [IC.truck,"Ücretsiz Kargo","Tüm siparişlerde ücretsiz ve sigortalı."],
+    [IC.shield,"Güvenli Alışveriş","256-bit SSL ile tam koruma."],
+  ].map(([ic,t,p])=>`<div class="feature">${ic}<div><h4>${t}</h4><p>${p}</p></div></div>`).join("");
+</script>
+</body>
+</html>

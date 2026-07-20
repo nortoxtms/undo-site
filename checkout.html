@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ödeme · UNDO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="checkout" data-nav="">
+<div id="site-header"></div>
+
+<div class="page-hero">
+  <div class="wrap">
+    <h1>Ödeme</h1>
+    <p>Güvenli ödeme — 256-bit SSL ile korunmaktadır.</p>
+  </div>
+</div>
+
+<div class="wrap" id="checkout-root">
+  <form class="checkout-layout" id="checkout-form">
+    <div>
+      <div class="form-section">
+        <h3><span class="num">1</span> İletişim Bilgileri</h3>
+        <div class="form-grid">
+          <div class="field full"><label>E-posta</label><input type="email" name="email" required placeholder="ornek@eposta.com"></div>
+          <div class="field"><label>Ad</label><input type="text" name="firstname" required placeholder="Adınız"></div>
+          <div class="field"><label>Soyad</label><input type="text" name="lastname" required placeholder="Soyadınız"></div>
+          <div class="field full"><label>Telefon</label><input type="tel" name="phone" required placeholder="+90 5xx xxx xx xx"></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3><span class="num">2</span> Teslimat Adresi</h3>
+        <div class="form-grid">
+          <div class="field full"><label>Adres</label><input type="text" name="address" required placeholder="Mahalle, cadde, sokak, no"></div>
+          <div class="field"><label>Şehir</label><input type="text" name="city" required placeholder="İstanbul"></div>
+          <div class="field"><label>İlçe</label><input type="text" required placeholder="Kadıköy"></div>
+          <div class="field"><label>Posta Kodu</label><input type="text" required placeholder="34000"></div>
+          <div class="field"><label>Ülke</label><select><option>Türkiye</option><option>Kıbrıs</option></select></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3><span class="num">3</span> Ödeme Yöntemi</h3>
+        <label class="pay-method active"><input type="radio" name="pay" checked> <span class="pm-label">Kredi / Banka Kartı</span></label>
+        <div class="form-grid" style="margin:6px 0 12px">
+          <div class="field full"><label>Kart Numarası</label><input type="text" placeholder="0000 0000 0000 0000"></div>
+          <div class="field"><label>Son Kullanma</label><input type="text" placeholder="AA/YY"></div>
+          <div class="field"><label>CVV</label><input type="text" placeholder="123"></div>
+        </div>
+        <label class="pay-method"><input type="radio" name="pay"> <span class="pm-label">Havale / EFT</span></label>
+        <label class="pay-method"><input type="radio" name="pay"> <span class="pm-label">Kapıda Ödeme</span></label>
+        <p style="font-size:12px;color:var(--text-mute);margin-top:14px">Bu bir demo mağazasıdır. Gerçek bir ödeme alınmaz; kart bilgileriniz hiçbir yere gönderilmez.</p>
+      </div>
+    </div>
+
+    <aside class="summary">
+      <h3>Siparişiniz</h3>
+      <div id="order-lines" style="margin-bottom:18px"></div>
+      <div id="checkout-summary"></div>
+      <button class="btn btn-solid btn-block" id="place-order" style="margin-top:22px">Siparişi Tamamla</button>
+      <a href="cart.html" class="btn btn-outline btn-block" style="margin-top:10px">Sepete Dön</a>
+      <p style="font-size:11px;color:var(--text-mute);text-align:center;margin-top:16px">Siparişi tamamlayarak <a href="#" style="color:var(--tan)">satış sözleşmesini</a> kabul etmiş olursunuz.</p>
+    </aside>
+  </form>
+</div>
+
+<div id="site-footer"></div>
+<script src="js/products.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

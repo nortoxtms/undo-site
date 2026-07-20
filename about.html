@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hakkımızda · UNDO</title>
+<meta name="description" content="1989'dan bu yana hakiki deriyi zamansız tasarımla buluşturan UNDO'nun hikayesi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="about" data-nav="Hakkımızda">
+<div id="site-header"></div>
+
+<!-- HERO -->
+<section class="about-hero">
+  <div class="hero-bg" id="about-bg"></div>
+  <div class="about-hero-inner">
+    <span class="eyebrow" style="color:var(--caramel)">Bizim Hikayemiz</span>
+    <h1>35 Yıllık Ustalık</h1>
+    <p>1989'dan bu yana, hakiki deriyi sabır, ustalık ve tutkuyla zamansız parçalara dönüştürüyoruz.</p>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="about-stats">
+  <div class="stat"><div class="num">35+</div><div class="lbl">Yıllık Deneyim</div></div>
+  <div class="stat"><div class="num">%100</div><div class="lbl">Hakiki Deri</div></div>
+  <div class="stat"><div class="num">120k</div><div class="lbl">Mutlu Müşteri</div></div>
+  <div class="stat"><div class="num">3</div><div class="lbl">Kuşak Ustalık</div></div>
+</section>
+
+<!-- STORY 1 -->
+<section class="split">
+  <div class="split-media"><img class="ph" id="about-img1" alt="Atölye"></div>
+  <div class="split-copy reveal">
+    <span class="eyebrow">Nasıl Başladık</span>
+    <h2>Bir Atölye, Bir Tutku</h2>
+    <p>1989 yılında küçük bir atölyede, tek bir dikiş makinesi ve büyük bir hayalle yola çıktık. Amacımız basitti: kullanıldıkça güzelleşen, nesilden nesle aktarılabilecek deri parçalar üretmek.</p>
+    <p>Bugün üç kuşaktır aynı özenle çalışıyoruz. Makineler değişti, ustalarımız çoğaldı; ama her ürüne dokunan el emeği ve kaliteden ödün vermeme ilkemiz hiç değişmedi.</p>
+  </div>
+</section>
+
+<!-- STORY 2 -->
+<section class="split rev">
+  <div class="split-media"><img class="ph" id="about-img2" alt="Deri seçimi"></div>
+  <div class="split-copy reveal">
+    <span class="eyebrow">Malzememiz</span>
+    <h2>Yalnızca En İyisi</h2>
+    <p>Her ceket, özenle seçilmiş %100 hakiki dana, kuzu ve koyun derisinden üretilir. Deriyi doğrudan güvenilir tabakhanelerden temin eder, her partiyi tek tek elden geçiririz.</p>
+    <p>Kimyasal işlemlerden mümkün olduğunca kaçınır, doğal tabaklama yöntemlerini tercih ederiz. Böylece deriniz zamanla kurumaz; aksine yumuşar ve size özel bir patina kazanır.</p>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Değerlerimiz</span>
+      <h2>Neden 35?</h2>
+      <p>Bizi biz yapan üç temel ilke.</p>
+    </div>
+    <div class="values-grid reveal" id="about-values"></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="story">
+  <div class="story-grid">
+    <div class="story-media"><img class="ph" id="about-img3" alt=""></div>
+    <div class="story-copy reveal">
+      <span class="eyebrow" style="color:var(--caramel)">Koleksiyonu Keşfedin</span>
+      <h2>Bir Ömürlük<br><em>Parçalar.</em></h2>
+      <p>Ustalığımızın izini taşıyan ceket ve paltoları keşfedin. Bir sezon değil, bir ömür için.</p>
+      <a href="shop.html" class="btn btn-ghost-dark">Alışverişe Başla</a>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="js/products.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+<script>
+  document.getElementById("about-bg").innerHTML = `<img src="${scenePH('siyah')}" alt="">`;
+  document.getElementById("about-img1").src = scenePH('kahve');
+  document.getElementById("about-img2").src = scenePH('taba');
+  document.getElementById("about-img3").src = scenePH('siyah');
+  document.getElementById("about-values").innerHTML = [
+    [IC.scissors,"El İşçiliği","Her parça, usta ellerde tek tek üretilir. Seri üretim yok, özen var."],
+    [IC.leather,"Hakiki Deri","Sadece en kaliteli, doğal deriyi kullanırız. Taviz vermeyiz."],
+    [IC.award,"Kalıcı Kalite","2 yıl garanti, bir ömür dayanıklılık. Yatırım yaptığınız bir parça."],
+  ].map(([ic,t,p])=>`<div class="value-card">${ic}<h3>${t}</h3><p>${p}</p></div>`).join("");
+</script>
+</body>
+</html>

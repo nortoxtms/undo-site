@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UNDO · Yönetim Paneli — Ürün Yönetimi</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin">
+
+<!-- ===== HEADER ===== -->
+<header class="adm-header">
+  <div class="adm-header-inner">
+    <a href="index.html" class="adm-brand">
+      <span class="mark">UNDO</span>
+      <span class="adm-brand-txt">Yönetim Paneli<small>UNDO</small></span>
+    </a>
+    <div class="adm-header-actions">
+      <span id="save-status" class="save-status is-saved">Tüm değişiklikler kaydedildi</span>
+      <a href="index.html" class="btn btn-outline btn-sm" target="_blank" rel="noopener">Siteyi Gör ↗</a>
+    </div>
+  </div>
+</header>
+
+<main class="adm-main">
+
+  <!-- ===== STATS ===== -->
+  <section class="adm-stats" id="adm-stats"></section>
+
+  <!-- ===== TABS ===== -->
+  <nav class="adm-tabs" role="tablist">
+    <button class="adm-tab active" data-tab="tab-products" role="tab">Ürünler</button>
+    <button class="adm-tab" data-tab="tab-tones" role="tab">Deri Tonları</button>
+    <button class="adm-tab" data-tab="tab-backup" role="tab">Yedekle &amp; Aktar</button>
+  </nav>
+
+  <!-- ===== PRODUCTS ===== -->
+  <section id="tab-products" class="adm-panel active" role="tabpanel">
+    <div class="adm-split">
+      <!-- list -->
+      <div class="adm-list-col">
+        <div class="adm-list-head">
+          <button class="btn btn-solid btn-sm btn-block" id="new-product">+ Yeni Ürün Ekle</button>
+          <div class="adm-list-filters">
+            <input type="search" id="search" placeholder="Ürün adı ara…" aria-label="Ürün ara">
+            <select id="filter-cat" aria-label="Kategori filtresi">
+              <option value="all">Tüm kategoriler</option>
+            </select>
+          </div>
+          <div class="adm-list-count" id="list-count"></div>
+        </div>
+        <div class="adm-list" id="product-list"></div>
+      </div>
+      <!-- editor -->
+      <div class="adm-form-col">
+        <div id="form-wrap" class="adm-form-wrap"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TONES ===== -->
+  <section id="tab-tones" class="adm-panel" role="tabpanel">
+    <div class="adm-section-head">
+      <div>
+        <h2>Deri Tonları / Renkler</h2>
+        <p class="muted">Ürünlerde kullanılan renk paletini buradan yönetin. Her ton, ürün görsellerini ve renk noktalarını otomatik oluşturur.</p>
+      </div>
+      <button class="btn btn-solid btn-sm" id="new-tone">+ Yeni Ton</button>
+    </div>
+    <div class="adm-tones" id="tone-list"></div>
+  </section>
+
+  <!-- ===== BACKUP ===== -->
+  <section id="tab-backup" class="adm-panel" role="tabpanel">
+    <div class="adm-section-head">
+      <div>
+        <h2>Yedekle &amp; Aktar</h2>
+        <p class="muted">Kataloğunu yedekle, başka bir cihaza taşı veya kalıcı olarak dosyaya göm.</p>
+      </div>
+    </div>
+    <div class="adm-backup-grid">
+      <div class="adm-card">
+        <h3>JSON Yedek</h3>
+        <p class="muted">Tüm ürün ve tonları tek dosyada indir. Yedekleme ve cihazlar arası taşıma için idealdir.</p>
+        <div class="adm-card-actions">
+          <button class="btn btn-solid btn-sm" id="export-json">JSON İndir</button>
+          <button class="btn btn-outline btn-sm" id="import-json">JSON Yükle</button>
+          <input type="file" id="import-json-file" accept="application/json,.json" hidden>
+        </div>
+      </div>
+      <div class="adm-card">
+        <h3>Kalıcı Gömme <span class="tag">products.js</span></h3>
+        <p class="muted">Güncel kataloğu <code>js/products.js</code> dosyası olarak indir. İndirdiğin dosyayı proje içindeki <code>js/products.js</code> ile değiştirirsen değişiklikler kalıcı ve herkeste geçerli olur.</p>
+        <div class="adm-card-actions">
+          <button class="btn btn-solid btn-sm" id="export-js">products.js İndir</button>
+        </div>
+      </div>
+      <div class="adm-card danger">
+        <h3>Varsayılana Sıfırla</h3>
+        <p class="muted">Panelde yapılan tüm değişiklikleri siler ve fabrika kataloğuna döner. Bu işlem geri alınamaz.</p>
+        <div class="adm-card-actions">
+          <button class="btn btn-outline btn-sm danger-btn" id="reset-all">Her Şeyi Sıfırla</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- confirm/modal host -->
+<div id="modal-host"></div>
+
+<script src="js/products.js"></script>
+<script src="js/app.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
