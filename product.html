@@ -83,6 +83,17 @@
   </section>
 </div>
 
+<!-- TAM EKRAN GÖRSEL -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Ürün görseli" hidden onclick="lightboxBackdrop(event)" ontouchstart="lightboxTouchStart(event)" ontouchend="lightboxTouchEnd(event)">
+  <button type="button" class="lb-close" aria-label="Kapat" onclick="closeLightbox()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <button type="button" class="lb-nav lb-prev" aria-label="Önceki görsel" onclick="lightboxStep(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <figure class="lb-figure">
+    <img id="lb-img" alt="">
+    <figcaption id="lb-caption" aria-live="polite"></figcaption>
+  </figure>
+  <button type="button" class="lb-nav lb-next" aria-label="Sonraki görsel" onclick="lightboxStep(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+</div>
+
 <div id="site-footer"></div>
 <script src="js/products.js"></script>
 <script src="js/auth.js"></script>
