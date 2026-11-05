@@ -120,7 +120,7 @@ const DEFAULT_PRODUCTS = [
   { id: "taba-suet-blazer",         name: "Taba Süet Blazer",               cat: "kadin", type: "jacket", price: 13400, old: null,  colors: ["taba"],     sizes: SIZES_W, rating: 4.7, reviews: 121, badge: null,        material: "Süet Deri",   views: ["on","arka"],       desc: "İki düğmeli, kapaklı cepli klasik süet blazer. Yumuşak dokusuyla günlük kombinlere sıcaklık katar." },
   { id: "zeytin-deri-parka",        name: "Zeytin Deri Parka",              cat: "kadin", type: "coat",   price: 17800, old: 19900, colors: ["zeytin"],   sizes: SIZES_W, rating: 4.8, reviews: 67,  badge: "İndirim",   material: "Kuzu Derisi", views: ["on","arka","yan"], desc: "Taba süet yaka ve manşetli, beli büzgülü deri parka. Geniş körüklü cepleriyle şehirde pratik." },
   { id: "siyah-orgu-bomber",        name: "Siyah Örgü Deri Bomber",         cat: "erkek", type: "jacket", price: 19500, old: null,  colors: ["siyah"],    sizes: SIZES_M, rating: 4.9, reviews: 73,  badge: "Öne Çıkan", material: "Dana Derisi", views: ["on","arka","yan"], desc: "El örgüsü görünümlü deri yüzeyi ve dik yakasıyla ayrışan bomber. Işıkla değişen zengin bir doku." },
-  { id: "kahve-deri-pelerin",       name: "Kahve Deri Pelerin",             cat: "kadin", type: "coat",   price: 15600, old: null,  colors: ["kahve"],    sizes: ["S/M","L/XL"], rating: 4.6, reviews: 41, badge: null,  material: "Kuzu Derisi", views: ["on","arka"],       desc: "Dik yakalı, gizli patlı ve dökümlü kesim deri pelerin. Katmanlı kombinlerin üzerine zahmetsizce oturur." },
+  { id: "kahve-deri-pelerin",       name: "Kahve Deri Pelerin",             cat: "kadin", type: "coat", chart: "pelerin",   price: 15600, old: null,  colors: ["kahve"],    sizes: ["S/M","L/XL"], rating: 4.6, reviews: 41, badge: null,  material: "Kuzu Derisi", views: ["on","arka"],       desc: "Dik yakalı, gizli patlı ve dökümlü kesim deri pelerin. Katmanlı kombinlerin üzerine zahmetsizce oturur." },
   { id: "bordo-parlak-bomber",      name: "Bordo Parlak Deri Bomber",       cat: "kadin", type: "jacket", price: 14800, old: null,  colors: ["bordo"],    sizes: SIZES_W, rating: 4.8, reviews: 88,  badge: null,        material: "Dana Derisi", views: ["arka","detay1","detay2","detay3"], desc: "Çıtçıtlı dik yaka, lastikli bel ve doğal kırışık dokulu parlak deri. Kullandıkça karakter kazanır." },
   { id: "bordo-deri-parka",         name: "Bordo Deri Parka",               cat: "kadin", type: "coat",   price: 17200, old: null,  colors: ["bordo"],    sizes: SIZES_W, rating: 4.7, reviews: 59,  badge: null,        material: "Kuzu Derisi", views: ["on","arka","yan"], desc: "Lacivert süet yaka ve manşetlerle tamamlanan, büzgülü belli deri parka." },
   { id: "turuncu-suet-kargo",       name: "Konyak Süet Kargo Ceket",        cat: "kadin", type: "jacket", price: 14200, old: null,  colors: ["konyak"],   sizes: SIZES_W, rating: 4.6, reviews: 77,  badge: null,        material: "Süet Deri",   views: ["on","arka","yan"], desc: "Körüklü büyük cepleri ve rahat kalıbıyla iş gücü esintili süet ceket." },
@@ -131,9 +131,9 @@ const DEFAULT_PRODUCTS = [
   { id: "siyah-buyuk-yaka",         name: "Büyük Yakalı Siyah Deri Ceket",  cat: "kadin", type: "jacket", price: 19900, old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 4.9, reviews: 29,  badge: "Yeni",      material: "Kuzu Derisi", views: ["on","arka"],       desc: "Sırta dökülen pelerin yakası ve bol kollarıyla heykelsi bir siluet." },
   { id: "siyah-kruvaze-palto",      name: "Siyah Kruvaze Deri Palto",       cat: "kadin", type: "coat",   price: 24500, old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 5.0, reviews: 22,  badge: "Öne Çıkan", material: "Dana Derisi", views: ["on"],              desc: "Beli oturan, boydan kruvaze deri palto. Ağırlığı ve dökümüyle gerçek bir yatırım parçası." },
   { id: "siyah-puskullu-uzun",      name: "Siyah Püsküllü Uzun Ceket",      cat: "kadin", type: "coat",   price: 22800, old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 4.8, reviews: 17,  badge: null,        material: "Kuzu Derisi", views: ["arka"],            desc: "Eteğinden dökülen uzun deri püsküllerle hareket eden, geniş omuzlu ceket." },
-  { id: "krem-kroko-elbise",        name: "Krem Kroko Deri Elbise",         cat: "kadin", type: "coat",   price: 23400, old: null,  colors: ["krem"],     sizes: SIZES_W, rating: 4.9, reviews: 14,  badge: "Yeni",      material: "Dana Derisi", views: ["on"],              desc: "Kroko baskılı deriden, dik yakalı ve vücudu saran kalem elbise." },
+  { id: "krem-kroko-elbise",        name: "Krem Kroko Deri Elbise",         cat: "kadin", type: "coat", chart: "elbise",   price: 23400, old: null,  colors: ["krem"],     sizes: SIZES_W, rating: 4.9, reviews: 14,  badge: "Yeni",      material: "Dana Derisi", views: ["on"],              desc: "Kroko baskılı deriden, dik yakalı ve vücudu saran kalem elbise." },
   { id: "haki-suet-trenckot",       name: "Haki Süet Trençkot",             cat: "kadin", type: "coat",   price: 18600, old: null,  colors: ["haki"],     sizes: SIZES_W, rating: 4.8, reviews: 56,  badge: null,        material: "Süet Deri",   views: ["on","arka"],       desc: "Çift sıra düğmeli, kemerli klasik trençkot; süetin yumuşak dokusuyla." },
-  { id: "haki-suet-pantolon",       name: "Haki Süet Pantolon",             cat: "kadin", type: "coat",   price: 9800,  old: null,  colors: ["haki"],     sizes: SIZES_W, rating: 4.5, reviews: 68,  badge: null,        material: "Süet Deri",   views: ["on","arka"],       desc: "Yüksek belli, dar paça süet pantolon. Esnek yapısıyla gün boyu konfor sunar." },
+  { id: "haki-suet-pantolon",       name: "Haki Süet Pantolon",             cat: "kadin", type: "coat", chart: "pantolon",   price: 9800,  old: null,  colors: ["haki"],     sizes: SIZES_W, rating: 4.5, reviews: 68,  badge: null,        material: "Süet Deri",   views: ["on","arka"],       desc: "Yüksek belli, dar paça süet pantolon. Esnek yapısıyla gün boyu konfor sunar." },
   { id: "bordo-kemerli-ceket",      name: "Bordo Kemerli Deri Ceket",       cat: "kadin", type: "jacket", price: 13600, old: 15200, colors: ["bordo"],    sizes: SIZES_W, rating: 4.6, reviews: 47,  badge: "İndirim",   material: "Dana Derisi", views: ["arka"],            desc: "İnce bel kemeri ve kalıplı omuzlarıyla parlak deri ceket." },
   { id: "gri-eskitme-kemerli",      name: "Antrasit Eskitme Kemerli Ceket", cat: "kadin", type: "jacket", price: 16200, old: null,  colors: ["antrasit"], sizes: SIZES_W, rating: 4.7, reviews: 36,  badge: null,        material: "Kuzu Derisi", views: ["arka"],            desc: "Eskitme işlemli deri, geniş yaka ve apoletli omuzlar. Her parça kendine özgü bir patina taşır." },
   { id: "taba-suet-dik-yaka",       name: "Taba Süet Dik Yaka Ceket",       cat: "kadin", type: "jacket", price: 11800, old: null,  colors: ["taba"],     sizes: SIZES_W, rating: 4.6, reviews: 61,  badge: null,        material: "Süet Deri",   views: ["on"],              desc: "Önü açık, dik yakalı ve kapak detaylı kısa süet ceket." },
@@ -175,8 +175,24 @@ PRODUCTS.forEach(p => {
 const CATEGORIES = [
   { key: "kadin",  label: "Kadın",       count: PRODUCTS.filter(p=>p.cat==="kadin").length, tone: "bordo" },
   { key: "erkek",  label: "Erkek",       count: PRODUCTS.filter(p=>p.cat==="erkek").length, tone: "kahve" },
-  { key: "aksesuar", label: "Aksesuar",  count: 12, tone: "konyak" },
-  { key: "koleksiyon", label: "Koleksiyonlar", count: 6, tone: "siyah" },
 ];
+
+/* ---- Ölçü tabloları (MOCK: gerçek ölçüler gelince güncellenecek) ---- */
+const SIZE_CHARTS = {
+  jacket:   { cols: ["Göğüs", "Omuz", "Kol", "Boy"], rows: { XS: [88, 38, 60, 52], S: [92, 40, 61, 54], M: [96, 42, 62, 56], L: [102, 44, 63, 58], XL: [108, 46, 64, 60], "2XL": [114, 48, 65, 62] }, fit: "Kalıbına uygun kesim. İki beden arasındaysanız büyük olanı seçin." },
+  coat:     { cols: ["Göğüs", "Omuz", "Kol", "Boy"], rows: { XS: [90, 38, 60, 104], S: [94, 40, 61, 106], M: [98, 42, 62, 108], L: [104, 44, 63, 110], XL: [110, 46, 64, 112], "2XL": [116, 48, 65, 114] }, fit: "Rahat kesim. Altına kalın giyecekseniz bir beden büyük düşünebilirsiniz." },
+  vest:     { cols: ["Göğüs", "Bel", "Boy"], rows: { XS: [80, 64, 38], S: [84, 68, 40], M: [88, 72, 42], L: [94, 78, 44], XL: [100, 84, 46] }, fit: "Vücudu saran kesim. Deri zamanla hafifçe esner." },
+  pantolon: { cols: ["Bel", "Kalça", "İç boy"], rows: { XS: [64, 88, 78], S: [68, 92, 78], M: [72, 96, 79], L: [78, 102, 79], XL: [84, 108, 80] }, fit: "Dar kesim, yüksek bel. Süet giydikçe vücuda oturur." },
+  elbise:   { cols: ["Göğüs", "Bel", "Kalça", "Boy"], rows: { XS: [80, 62, 88, 112], S: [84, 66, 92, 113], M: [88, 70, 96, 114], L: [94, 76, 102, 115], XL: [100, 82, 108, 116] }, fit: "Vücudu saran kalem kesim. İki beden arasındaysanız büyük olanı seçin." },
+  pelerin:  { cols: ["Omuz", "Boy"], rows: { "S/M": [44, 72], "L/XL": [48, 75] }, fit: "Dökümlü kesim. Beden aralığı geniştir." },
+};
+function chartOf(p) { return SIZE_CHARTS[p.chart] || SIZE_CHARTS[p.type] || SIZE_CHARTS.jacket; }
+
+const CARE = {
+  suet: ["Suyla silmeyin; tozu yumuşak süet fırçasıyla alın.", "Leke için bir deri uzmanına başvurun.", "Geniş askıda, plastik torba dışında saklayın."],
+  deri: ["Nemli olmayan yumuşak bezle silin.", "Yılda bir iki kez deri kremiyle besleyin.", "Geniş askıda, plastik torba dışında saklayın."],
+};
+function careOf(p) { return /süet/i.test(p.material) ? CARE.suet : CARE.deri; }
+function hasFrontPhoto(p) { return !p.views || p.views.includes("on"); }
 
 const TL = n => "₺" + n.toLocaleString("tr-TR");

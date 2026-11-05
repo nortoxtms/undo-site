@@ -37,6 +37,7 @@ function cleanProduct(p) {
     rating: p.rating, reviews: p.reviews, badge: p.badge ?? null, material: p.material, desc: p.desc,
   };
   if (p.views && p.views.length) c.views = [...p.views];
+  if (p.chart && SIZE_CHARTS[p.chart]) c.chart = p.chart;
   return c;
 }
 
@@ -300,7 +301,7 @@ async function saveProduct(form, isNew, original) {
   formError("");
 
   const product = cleanProduct({
-    id, name, price, old, rating, reviews, colors, sizes, views,
+    id, name, price, old, rating, reviews, colors, sizes, views, chart: isNew ? undefined : original.chart,
     cat: f.cat.value, type: f.type.value, material: f.material.value,
     badge: f.badge.value || null, desc: plainText(f.desc.value),
   });
