@@ -1,8 +1,8 @@
 /* ============================================================
-   35 — Product Catalogue
-   Swap `image` fields with real photo paths (e.g. "assets/products/jacket-1.jpg")
-   whenever you have photography. The SVG placeholders below keep the
-   site looking finished until then.
+   UNDO — Ürün Kataloğu (mock veri, gerçek ürün fotoğrafları)
+   Görseller: assets/products/<id>-<açı>.webp  (açı: on, arka, yan, detay1…)
+   İsim, fiyat, puan ve açıklamalar temsilîdir.
+   `views` alanı olmayan ürünler (ör. panelden eklenenler) SVG yer tutucu kullanır.
    ============================================================ */
 
 /* ---- Admin override katmanı ----
@@ -17,12 +17,19 @@ const _CATALOG = loadCatalog();
 
 /* ---- Leather-tone palettes for placeholder art ---- */
 const DEFAULT_TONES = {
-  siyah:   { name: "Siyah",       base: "#211d19", edge: "#3a332b", stitch: "#5a4f42", hex: "#1c1a17" },
-  kahve:   { name: "Koyu Kahve",  base: "#4b3a2a", edge: "#6b4a2f", stitch: "#8a5a34", hex: "#5a3a20" },
-  taba:    { name: "Taba",        base: "#7a4e2a", edge: "#9a6636", stitch: "#c08a52", hex: "#8a5a34" },
-  konyak:  { name: "Konyak",      base: "#8a4f28", edge: "#a9713f", stitch: "#c98f5a", hex: "#a9713f" },
-  bordo:   { name: "Bordo",       base: "#4a2320", edge: "#652f2a", stitch: "#8a4a40", hex: "#5a2b26" },
-  bej:     { name: "Bej Süet",    base: "#8f7a5f", edge: "#a8907d", stitch: "#c9b48f", hex: "#a8907d" },
+  siyah:    { name: "Siyah",       base: "#211d19", edge: "#3a332b", stitch: "#5a4f42", hex: "#1c1a17" },
+  kahve:    { name: "Koyu Kahve",  base: "#4b3a2a", edge: "#6b4a2f", stitch: "#8a5a34", hex: "#3f2a1e" },
+  taba:     { name: "Taba",        base: "#7a4e2a", edge: "#9a6636", stitch: "#c08a52", hex: "#9a6333" },
+  konyak:   { name: "Konyak",      base: "#8a4f28", edge: "#a9713f", stitch: "#c98f5a", hex: "#c0702c" },
+  bordo:    { name: "Bordo",       base: "#4a2320", edge: "#652f2a", stitch: "#8a4a40", hex: "#5e1f26" },
+  vizon:    { name: "Vizon",       base: "#6f5843", edge: "#8a6f56", stitch: "#a88d72", hex: "#8a6d52" },
+  haki:     { name: "Haki",        base: "#66604a", edge: "#7b7455", stitch: "#98906e", hex: "#7b7455" },
+  zeytin:   { name: "Zeytin",      base: "#3f4230", edge: "#54583f", stitch: "#737757", hex: "#4a4d36" },
+  antrasit: { name: "Antrasit",    base: "#4a4b48", edge: "#61625e", stitch: "#80817c", hex: "#5d5e5b" },
+  lacivert: { name: "Lacivert",    base: "#1d2230", edge: "#2d3448", stitch: "#4a5370", hex: "#1f2533" },
+  mavi:     { name: "Buz Mavisi",  base: "#8fb0d1", edge: "#a9c6e3", stitch: "#c7dcf0", hex: "#a9c6e3" },
+  lila:     { name: "Lila",        base: "#a2a6c4", edge: "#b9bdd6", stitch: "#d3d6e6", hex: "#b9bdd6" },
+  krem:     { name: "Krem",        base: "#c9bfa8", edge: "#d9cfb9", stitch: "#ebe3d0", hex: "#d9cfb9" },
 };
 /* Panelde düzenlenmiş tonlar varsa onları kullan */
 const LEATHER_TONES = (_CATALOG && _CATALOG.tones && Object.keys(_CATALOG.tones).length) ? _CATALOG.tones : DEFAULT_TONES;
@@ -103,27 +110,66 @@ function scenePH(toneKey, label) {
 }
 
 /* ---- The catalogue ---- */
+const SIZES_W = ["XS","S","M","L","XL"];
+const SIZES_M = ["S","M","L","XL","2XL"];
 const DEFAULT_PRODUCTS = [
-  { id: "biker-noir",   name: "Noir Biker Ceket",       cat: "erkek",    type: "jacket", price: 12450, old: null,  colors: ["siyah","kahve"],           sizes: ["S","M","L","XL","2XL"], rating: 4.8, reviews: 142, badge: "Çok Satan", material: "Dana Derisi",  desc: "%100 hakiki dana derisinden, el işçiliğiyle üretilmiş zamansız biker ceket. Asimetrik fermuar, modern kalıp ve dayanıklı metal aksesuarlar." },
-  { id: "aviator-shear",name: "Aviator Kürklü Ceket",   cat: "erkek",    type: "jacket", price: 18900, old: 21500, colors: ["kahve","taba"],            sizes: ["M","L","XL","2XL"],     rating: 4.9, reviews: 98,  badge: "Yeni", material: "Koyun Derisi", desc: "İçi shearling kürk astarlı, kış için tasarlanmış klasik aviator ceket. Sıcak, hafif ve son derece şık." },
-  { id: "moto-tan",     name: "Konyak Moto Ceket",      cat: "kadin",    type: "jacket", price: 11250, old: null,  colors: ["konyak","taba","siyah"],   sizes: ["XS","S","M","L","XL"],  rating: 4.7, reviews: 210, badge: null, material: "Kuzu Derisi",  desc: "Yumuşak kuzu derisinden, vücudu saran modern moto kalıp. Günlük ve gece kombinlerine kolayca uyum sağlar." },
-  { id: "trench-espr",  name: "Espresso Deri Trençkot", cat: "kadin",    type: "coat",   price: 16800, old: null,  colors: ["kahve","siyah"],           sizes: ["XS","S","M","L"],       rating: 4.9, reviews: 76,  badge: "Öne Çıkan", material: "Dana Derisi", desc: "Diz altı boyda, çift sıra düğmeli deri trençkot. Zarif duruşu ve dökümlü kalıbıyla bir yatırım parçası." },
-  { id: "cafe-racer",   name: "Café Racer Ceket",       cat: "erkek",    type: "jacket", price: 10950, old: null,  colors: ["siyah","bordo","kahve"],   sizes: ["S","M","L","XL","2XL"], rating: 4.6, reviews: 188, badge: null, material: "Dana Derisi",  desc: "Minimal dik yaka ve temiz hatlarıyla café racer klasiği. Sadeliği seven modern erkek için." },
-  { id: "suede-blazer", name: "Süet Blazer Ceket",      cat: "erkek",    type: "jacket", price: 13400, old: null,  colors: ["bej","taba"],              sizes: ["M","L","XL"],           rating: 4.7, reviews: 54,  badge: "Yeni", material: "Süet Deri",  desc: "Yapılandırılmış omuz ve yumuşak süet dokusuyla ceket-blazer arası çok yönlü bir parça." },
-  { id: "shacket-tan",  name: "Taba Deri Gömlek Ceket", cat: "kadin",    type: "vest",   price: 8900,  old: 10500, colors: ["taba","kahve","bej"],      sizes: ["XS","S","M","L","XL"],  rating: 4.5, reviews: 132, badge: "İndirim", material: "Kuzu Derisi", desc: "Gömlek rahatlığında, ceket şıklığında hibrit bir tasarım. Katmanlı kombinlerin vazgeçilmezi." },
-  { id: "long-coat",    name: "Uzun Deri Palto",        cat: "kadin",    type: "coat",   price: 19500, old: null,  colors: ["siyah","bordo"],           sizes: ["XS","S","M","L"],       rating: 5.0, reviews: 41,  badge: "Öne Çıkan", material: "Dana Derisi", desc: "Ayak bileğine kadar uzanan dramatik siluet. Ağırlığı ve dökümüyle gerçek bir statü parçası." },
-  { id: "bomber-black", name: "Deri Bomber Ceket",      cat: "erkek",    type: "jacket", price: 9750,  old: null,  colors: ["siyah","kahve"],           sizes: ["S","M","L","XL","2XL"], rating: 4.6, reviews: 167, badge: null, material: "Kuzu Derisi",  desc: "Ribana yaka ve manşetli spor kesim bomber. Şehir hayatının rahat ama sofistike seçeneği." },
-  { id: "quilted-moto", name: "Kapitone Moto Ceket",    cat: "kadin",    type: "jacket", price: 12900, old: null,  colors: ["siyah","konyak"],          sizes: ["XS","S","M","L","XL"],  rating: 4.8, reviews: 89,  badge: "Yeni", material: "Kuzu Derisi", desc: "Omuz ve kollarda kapitone detaylı, dokusuyla fark yaratan moto ceket." },
-  { id: "vest-rugged",  name: "Deri Yelek",             cat: "erkek",    type: "vest",   price: 6500,  old: null,  colors: ["kahve","siyah","taba"],    sizes: ["S","M","L","XL","2XL"], rating: 4.4, reviews: 73,  badge: null, material: "Dana Derisi",  desc: "Katmanlamayı seven için dayanıklı ve karakterli bir deri yelek." },
-  { id: "cropped-tan",  name: "Crop Deri Ceket",        cat: "kadin",    type: "jacket", price: 8400,  old: null,  colors: ["taba","siyah","bej"],      sizes: ["XS","S","M","L"],       rating: 4.7, reviews: 156, badge: "Çok Satan", material: "Kuzu Derisi", desc: "Kısa boy modern kalıp; yüksek belli parçalarla mükemmel uyum." },
+  { id: "turuncu-suet-biker",       name: "Konyak Süet Biker Ceket",        cat: "kadin", type: "jacket", price: 13900, old: null,  colors: ["konyak"],   sizes: SIZES_W, rating: 4.9, reviews: 186, badge: "Çok Satan", material: "Süet Deri",   views: ["on","arka","yan"], desc: "Asimetrik fermuarı ve altın rengi metal detaylarıyla kısa kesim süet biker. Yüksek belli parçalarla dengeli bir siluet oluşturur." },
+  { id: "bordo-kruvaze-blazer",     name: "Bordo Deri Kruvaze Blazer",      cat: "kadin", type: "jacket", price: 16750, old: null,  colors: ["bordo"],    sizes: SIZES_W, rating: 4.8, reviews: 94,  badge: "Öne Çıkan", material: "Kuzu Derisi", views: ["on","arka","yan"], desc: "Geniş yaka ve çift sıra düğmeli, rahat kalıp deri blazer. Ofisten akşam yemeğine aynı duruşu taşır." },
+  { id: "siyah-puskullu-biker",     name: "Püsküllü Siyah Biker Ceket",     cat: "kadin", type: "jacket", price: 21400, old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 5.0, reviews: 38,  badge: "Yeni",      material: "Kuzu Derisi", views: ["on","arka","yan"], desc: "Krem biye detayları ve sırtından dökülen uzun püskülleriyle koleksiyonun en iddialı parçası." },
+  { id: "yilan-desenli-ceket",      name: "Yılan Desenli Deri Ceket",       cat: "kadin", type: "jacket", price: 18900, old: null,  colors: ["kahve"],    sizes: SIZES_W, rating: 4.7, reviews: 52,  badge: "Yeni",      material: "Dana Derisi", views: ["on","arka","yan"], desc: "Yılan baskılı parlak deri, süet yaka ve manşetlerle buluşuyor. Kontrast dokularıyla öne çıkan bir ceket." },
+  { id: "taba-suet-blazer",         name: "Taba Süet Blazer",               cat: "kadin", type: "jacket", price: 13400, old: null,  colors: ["taba"],     sizes: SIZES_W, rating: 4.7, reviews: 121, badge: null,        material: "Süet Deri",   views: ["on","arka"],       desc: "İki düğmeli, kapaklı cepli klasik süet blazer. Yumuşak dokusuyla günlük kombinlere sıcaklık katar." },
+  { id: "zeytin-deri-parka",        name: "Zeytin Deri Parka",              cat: "kadin", type: "coat",   price: 17800, old: 19900, colors: ["zeytin"],   sizes: SIZES_W, rating: 4.8, reviews: 67,  badge: "İndirim",   material: "Kuzu Derisi", views: ["on","arka","yan"], desc: "Taba süet yaka ve manşetli, beli büzgülü deri parka. Geniş körüklü cepleriyle şehirde pratik." },
+  { id: "siyah-orgu-bomber",        name: "Siyah Örgü Deri Bomber",         cat: "erkek", type: "jacket", price: 19500, old: null,  colors: ["siyah"],    sizes: SIZES_M, rating: 4.9, reviews: 73,  badge: "Öne Çıkan", material: "Dana Derisi", views: ["on","arka","yan"], desc: "El örgüsü görünümlü deri yüzeyi ve dik yakasıyla ayrışan bomber. Işıkla değişen zengin bir doku." },
+  { id: "kahve-deri-pelerin",       name: "Kahve Deri Pelerin",             cat: "kadin", type: "coat",   price: 15600, old: null,  colors: ["kahve"],    sizes: ["S/M","L/XL"], rating: 4.6, reviews: 41, badge: null,  material: "Kuzu Derisi", views: ["on","arka"],       desc: "Dik yakalı, gizli patlı ve dökümlü kesim deri pelerin. Katmanlı kombinlerin üzerine zahmetsizce oturur." },
+  { id: "bordo-parlak-bomber",      name: "Bordo Parlak Deri Bomber",       cat: "kadin", type: "jacket", price: 14800, old: null,  colors: ["bordo"],    sizes: SIZES_W, rating: 4.8, reviews: 88,  badge: null,        material: "Dana Derisi", views: ["arka","detay1","detay2","detay3"], desc: "Çıtçıtlı dik yaka, lastikli bel ve doğal kırışık dokulu parlak deri. Kullandıkça karakter kazanır." },
+  { id: "bordo-deri-parka",         name: "Bordo Deri Parka",               cat: "kadin", type: "coat",   price: 17200, old: null,  colors: ["bordo"],    sizes: SIZES_W, rating: 4.7, reviews: 59,  badge: null,        material: "Kuzu Derisi", views: ["on","arka","yan"], desc: "Lacivert süet yaka ve manşetlerle tamamlanan, büzgülü belli deri parka." },
+  { id: "turuncu-suet-kargo",       name: "Konyak Süet Kargo Ceket",        cat: "kadin", type: "jacket", price: 14200, old: null,  colors: ["konyak"],   sizes: SIZES_W, rating: 4.6, reviews: 77,  badge: null,        material: "Süet Deri",   views: ["on","arka","yan"], desc: "Körüklü büyük cepleri ve rahat kalıbıyla iş gücü esintili süet ceket." },
+  { id: "vizon-suet-blazer",        name: "Vizon Süet Blazer",              cat: "kadin", type: "jacket", price: 13900, old: null,  colors: ["vizon"],    sizes: SIZES_W, rating: 4.7, reviews: 64,  badge: null,        material: "Süet Deri",   views: ["on","arka","yan"], desc: "Sivri yaka ve belirgin omuz hattıyla yapılandırılmış süet blazer. Zarif, çok yönlü bir parça." },
+  { id: "siyah-kemerli-crop",       name: "Siyah Kemerli Crop Ceket",       cat: "kadin", type: "jacket", price: 15400, old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 4.8, reviews: 101, badge: "Çok Satan", material: "Kuzu Derisi", views: ["on","arka","yan"], desc: "Apoletli omuz, geniş yaka ve bel kemeriyle trençkottan ilham alan kısa deri ceket." },
+  { id: "siyah-deri-gomlek",        name: "Siyah Deri Gömlek Ceket",        cat: "kadin", type: "jacket", price: 12600, old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 4.6, reviews: 83,  badge: null,        material: "Kuzu Derisi", views: ["on","arka"],       desc: "Çift göğüs cepli, vücudu saran gömlek kesimi. Örgü kol paneli hareket özgürlüğü sağlar." },
+  { id: "siyah-suet-crop",          name: "Siyah Süet Crop Ceket",          cat: "kadin", type: "jacket", price: 10900, old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 4.5, reviews: 112, badge: null,        material: "Süet Deri",   views: ["on","arka","yan"], desc: "Denim ceketin çizgilerini süetle yeniden yorumlayan kısa kesim bir tasarım." },
+  { id: "siyah-buyuk-yaka",         name: "Büyük Yakalı Siyah Deri Ceket",  cat: "kadin", type: "jacket", price: 19900, old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 4.9, reviews: 29,  badge: "Yeni",      material: "Kuzu Derisi", views: ["on","arka"],       desc: "Sırta dökülen pelerin yakası ve bol kollarıyla heykelsi bir siluet." },
+  { id: "siyah-kruvaze-palto",      name: "Siyah Kruvaze Deri Palto",       cat: "kadin", type: "coat",   price: 24500, old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 5.0, reviews: 22,  badge: "Öne Çıkan", material: "Dana Derisi", views: ["on"],              desc: "Beli oturan, boydan kruvaze deri palto. Ağırlığı ve dökümüyle gerçek bir yatırım parçası." },
+  { id: "siyah-puskullu-uzun",      name: "Siyah Püsküllü Uzun Ceket",      cat: "kadin", type: "coat",   price: 22800, old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 4.8, reviews: 17,  badge: null,        material: "Kuzu Derisi", views: ["arka"],            desc: "Eteğinden dökülen uzun deri püsküllerle hareket eden, geniş omuzlu ceket." },
+  { id: "krem-kroko-elbise",        name: "Krem Kroko Deri Elbise",         cat: "kadin", type: "coat",   price: 23400, old: null,  colors: ["krem"],     sizes: SIZES_W, rating: 4.9, reviews: 14,  badge: "Yeni",      material: "Dana Derisi", views: ["on"],              desc: "Kroko baskılı deriden, dik yakalı ve vücudu saran kalem elbise." },
+  { id: "haki-suet-trenckot",       name: "Haki Süet Trençkot",             cat: "kadin", type: "coat",   price: 18600, old: null,  colors: ["haki"],     sizes: SIZES_W, rating: 4.8, reviews: 56,  badge: null,        material: "Süet Deri",   views: ["on","arka"],       desc: "Çift sıra düğmeli, kemerli klasik trençkot; süetin yumuşak dokusuyla." },
+  { id: "haki-suet-pantolon",       name: "Haki Süet Pantolon",             cat: "kadin", type: "coat",   price: 9800,  old: null,  colors: ["haki"],     sizes: SIZES_W, rating: 4.5, reviews: 68,  badge: null,        material: "Süet Deri",   views: ["on","arka"],       desc: "Yüksek belli, dar paça süet pantolon. Esnek yapısıyla gün boyu konfor sunar." },
+  { id: "bordo-kemerli-ceket",      name: "Bordo Kemerli Deri Ceket",       cat: "kadin", type: "jacket", price: 13600, old: 15200, colors: ["bordo"],    sizes: SIZES_W, rating: 4.6, reviews: 47,  badge: "İndirim",   material: "Dana Derisi", views: ["arka"],            desc: "İnce bel kemeri ve kalıplı omuzlarıyla parlak deri ceket." },
+  { id: "gri-eskitme-kemerli",      name: "Antrasit Eskitme Kemerli Ceket", cat: "kadin", type: "jacket", price: 16200, old: null,  colors: ["antrasit"], sizes: SIZES_W, rating: 4.7, reviews: 36,  badge: null,        material: "Kuzu Derisi", views: ["arka"],            desc: "Eskitme işlemli deri, geniş yaka ve apoletli omuzlar. Her parça kendine özgü bir patina taşır." },
+  { id: "taba-suet-dik-yaka",       name: "Taba Süet Dik Yaka Ceket",       cat: "kadin", type: "jacket", price: 11800, old: null,  colors: ["taba"],     sizes: SIZES_W, rating: 4.6, reviews: 61,  badge: null,        material: "Süet Deri",   views: ["on"],              desc: "Önü açık, dik yakalı ve kapak detaylı kısa süet ceket." },
+  { id: "zeytin-suet-dik-yaka",     name: "Zeytin Süet Dik Yaka Ceket",     cat: "kadin", type: "jacket", price: 11800, old: null,  colors: ["zeytin"],   sizes: SIZES_W, rating: 4.5, reviews: 33,  badge: null,        material: "Süet Deri",   views: ["arka"],            desc: "Bel hattı dikişli, dik yakalı kısa süet ceket." },
+  { id: "yesil-suet-omuz",          name: "Yeşil Süet Omuz Detaylı Ceket",  cat: "kadin", type: "jacket", price: 12900, old: null,  colors: ["zeytin"],   sizes: SIZES_W, rating: 4.7, reviews: 42,  badge: null,        material: "Süet Deri",   views: ["arka","yan"],      desc: "Omuzlardan sırta inen V formlu katman detayıyla modern bir süet ceket." },
+  { id: "kahve-suet-bel-ceket",     name: "Koyu Kahve Süet Bel Vurgulu Ceket", cat: "kadin", type: "jacket", price: 12400, old: null, colors: ["kahve"],  sizes: SIZES_W, rating: 4.6, reviews: 49,  badge: null,        material: "Süet Deri",   views: ["arka","yan"],      desc: "Vücudu saran dikişleri ve belirgin omuzlarıyla kadınsı bir süet ceket." },
+  { id: "siyah-deri-vyaka",         name: "Siyah Deri V Yaka Üst",          cat: "kadin", type: "vest",   price: 7900,  old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 4.7, reviews: 71,  badge: null,        material: "Kuzu Derisi", views: ["on","arka","yan"], desc: "Sırtı fermuarlı, derin V yakalı kısa deri üst." },
+  { id: "siyah-kapitone-halter",    name: "Siyah Kapitone Deri Halter",     cat: "kadin", type: "vest",   price: 8600,  old: null,  colors: ["siyah"],    sizes: SIZES_W, rating: 4.8, reviews: 26,  badge: "Yeni",      material: "Kuzu Derisi", views: ["on","arka","yan"], desc: "Boyun bağlamalı, göğsü kapitone işlemeli kısa deri üst." },
+  { id: "lila-bustiyer",            name: "Lila Deri Büstiyer",             cat: "kadin", type: "vest",   price: 6900,  old: null,  colors: ["lila"],     sizes: SIZES_W, rating: 4.4, reviews: 31,  badge: null,        material: "Kuzu Derisi", views: ["arka"],            desc: "İnce askılı, düz kesim deri büstiyer. Blazer altında ya da tek başına." },
+  { id: "kahve-eskitme-ceket",      name: "Kahve Eskitme Deri Ceket",       cat: "erkek", type: "jacket", price: 17400, old: null,  colors: ["kahve"],    sizes: SIZES_M, rating: 4.9, reviews: 134, badge: "Çok Satan", material: "Dana Derisi", views: ["on","arka","yan"], desc: "Kontrast dikişli, körüklü cepli eskitme deri ceket. Yıllar geçtikçe daha da güzelleşir." },
+  { id: "siyah-kroko-bomber",       name: "Siyah Kroko Deri Bomber",        cat: "erkek", type: "jacket", price: 16900, old: null,  colors: ["siyah"],    sizes: SIZES_M, rating: 4.7, reviews: 58,  badge: null,        material: "Dana Derisi", views: ["arka","yan"],      desc: "İnce kroko baskılı deri, dik yaka ve lastikli bel." },
+  { id: "bordo-yakali-bomber",      name: "Bordo Yakalı Siyah Bomber",      cat: "erkek", type: "jacket", price: 15800, old: null,  colors: ["siyah"],    sizes: SIZES_M, rating: 4.6, reviews: 37,  badge: null,        material: "Dana Derisi", views: ["on"],              desc: "Siyah deri gövdeyi bordo süet yaka ve manşetlerle buluşturan kontrast bomber." },
+  { id: "lacivert-deri-bomber",     name: "Lacivert Deri Bomber",           cat: "erkek", type: "jacket", price: 14600, old: null,  colors: ["lacivert"], sizes: SIZES_M, rating: 4.7, reviews: 66,  badge: null,        material: "Kuzu Derisi", views: ["on","yan"],        desc: "Yakasız, çift sıra düğmeli ve apoletli yumuşak deri bomber." },
+  { id: "siyah-deri-bomber",        name: "Siyah Düz Deri Bomber",          cat: "erkek", type: "jacket", price: 13200, old: null,  colors: ["siyah"],    sizes: SIZES_M, rating: 4.6, reviews: 147, badge: null,        material: "Kuzu Derisi", views: ["arka","yan"],      desc: "Dik yakalı, lastikli belli sade bomber. Şehir hayatının rahat ama sofistike seçeneği." },
+  { id: "kahve-suet-bomber-fermuar",name: "Koyu Kahve Süet Fermuarlı Bomber", cat: "erkek", type: "jacket", price: 12800, old: null, colors: ["kahve"],  sizes: SIZES_M, rating: 4.7, reviews: 79,  badge: null,        material: "Süet Deri",   views: ["on","arka","yan"], desc: "Altın rengi fermuarları ve omuz detaylarıyla süet bomber." },
+  { id: "kahve-suet-bomber-dik",    name: "Koyu Kahve Süet Dik Yaka Bomber", cat: "erkek", type: "jacket", price: 12300, old: null, colors: ["kahve"],   sizes: SIZES_M, rating: 4.6, reviews: 92,  badge: null,        material: "Süet Deri",   views: ["on","arka","yan"], desc: "Lacivert astarlı dik yaka ve lastikli bel. Her mevsimin süet bomberı." },
+  { id: "kahve-suet-bomber-yatik",  name: "Koyu Kahve Süet Yatık Yaka Bomber", cat: "erkek", type: "jacket", price: 11900, old: 13400, colors: ["kahve"], sizes: SIZES_M, rating: 4.5, reviews: 45, badge: "İndirim", material: "Süet Deri",   views: ["on"],              desc: "Klasik yatık yaka, dikey fermuarlı cepler ve dokulu bel bandı." },
+  { id: "haki-suet-bomber",         name: "Haki Süet Düğmeli Bomber",       cat: "erkek", type: "jacket", price: 11600, old: null,  colors: ["haki"],     sizes: SIZES_M, rating: 4.6, reviews: 54,  badge: null,        material: "Süet Deri",   views: ["on","arka","yan"], desc: "Çift göğüs cepli, metal düğmeli ve lastikli belli rahat süet ceket." },
+  { id: "mavi-suet-gomlek",         name: "Buz Mavisi Süet Gömlek Ceket",   cat: "erkek", type: "jacket", price: 10800, old: null,  colors: ["mavi"],     sizes: SIZES_M, rating: 4.5, reviews: 28,  badge: "Yeni",      material: "Süet Deri",   views: ["on","arka"],       desc: "Açık tonuyla sıra dışı, çıtçıtlı süet gömlek ceket." },
+  { id: "taba-suet-gomlek",         name: "Taba Süet Oversize Gömlek",      cat: "erkek", type: "jacket", price: 10400, old: null,  colors: ["taba"],     sizes: SIZES_M, rating: 4.6, reviews: 63,  badge: null,        material: "Süet Deri",   views: ["on","arka"],       desc: "Tek cepli, gizli düğmeli ve salaş kalıp süet gömlek." },
+  { id: "taba-suet-dugmeli",        name: "Taba Süet Düğmeli Ceket",        cat: "erkek", type: "jacket", price: 12100, old: null,  colors: ["taba"],     sizes: SIZES_M, rating: 4.7, reviews: 87,  badge: null,        material: "Süet Deri",   views: ["on","arka"],       desc: "Dört düğmeli, büyük kare cepli rahat süet ceket." },
 ];
 /* Panelde eklenmiş/düzenlenmiş ürünler varsa onları kullan */
 const PRODUCTS = (_CATALOG && Array.isArray(_CATALOG.products) && _CATALOG.products.length) ? _CATALOG.products : DEFAULT_PRODUCTS;
 
-/* attach generated imagery to each product */
+/* Her ürüne görsellerini bağla: gerçek fotoğraf varsa onlar, yoksa SVG yer tutucu */
+const VIEW_LABELS = { on: "Ön", arka: "Arka", yan: "Yan", detay1: "Detay", detay2: "Detay", detay3: "Detay" };
 PRODUCTS.forEach(p => {
-  p.images = imageSet(p.type, p.colors);
-  p.gallery = p.colors.map(c => p.images[c]);
+  if (p.views && p.views.length) {
+    p.gallery = p.views.map(v => ({ label: VIEW_LABELS[v] || v, src: `assets/products/${p.id}-${v}.webp` }));
+    p.images = {};
+    p.colors.forEach(c => { p.images[c] = p.gallery[0].src; });
+  } else {
+    p.images = imageSet(p.type, p.colors);
+    p.gallery = p.colors.map(c => ({ label: (LEATHER_TONES[c] || {}).name || c, src: p.images[c] }));
+  }
 });
 
 const CATEGORIES = [
