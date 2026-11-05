@@ -36,8 +36,8 @@ Static site — works as-is on any static host, each giving a free subdomain:
 ## Making it yours
 - **Brand name** — "UNDO" lives in `js/app.js` (`renderHeader` / `renderFooter`) and page `<title>`s.
 - **Products** — all in `js/products.js` (`PRODUCTS`), or manage visually via `admin.html`.
-- **Photos** — real imagery lives in `assets/` (`hero.png`, `story.png`, `cat-*.png`, `footer.png`).
-  Product cards still use generated SVG placeholders; swap them in `js/products.js`.
+- **Photos** — brand imagery lives in `assets/` (`hero.webp`, `story.webp`, `cat-*.webp`, `footer.webp`).
+  Product photos are transparent cut-outs in `assets/products/<id>-<on|arka|yan|detay1>.webp`, listed per product in `js/products.js` (`views`). Names, prices and ratings are mock data.
 - **Story video** — the homepage story section has a left-side video slot; drop a `<video>` in
   the marked spot in `index.html`.
 - **Colours & fonts** — CSS variables at the top of `css/style.css` (`:root`).

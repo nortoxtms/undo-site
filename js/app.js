@@ -30,14 +30,14 @@ const IC = {
 
 /* ---------- Foto görseller (assets/) ---------- */
 const ASSETS = {
-  hero:   "assets/hero.png",
-  story:  "assets/story.png",
-  footer: "assets/footer.png",
+  hero:   "assets/hero.webp",
+  story:  "assets/story.webp",
+  footer: "assets/footer.webp",
   cat: {
-    kadin:      "assets/cat-kadin.png",
-    erkek:      "assets/cat-erkek.png",
-    aksesuar:   "assets/cat-aksesuar.png",
-    koleksiyon: "assets/cat-koleksiyon.png",
+    kadin:      "assets/cat-kadin.webp",
+    erkek:      "assets/cat-erkek.webp",
+    aksesuar:   "assets/cat-aksesuar.webp",
+    koleksiyon: "assets/cat-koleksiyon.webp",
   },
 };
 
@@ -86,7 +86,7 @@ function toggleWish(id, el) {
 /* ---------- Toast ---------- */
 function toast(msg) {
   let wrap = document.querySelector(".toast-wrap");
-  if (!wrap) { wrap = document.createElement("div"); wrap.className = "toast-wrap"; document.body.appendChild(wrap); }
+  if (!wrap) { wrap = document.createElement("div"); wrap.className = "toast-wrap"; wrap.setAttribute("role", "status"); wrap.setAttribute("aria-live", "polite"); document.body.appendChild(wrap); }
   const t = document.createElement("div");
   t.className = "toast";
   t.innerHTML = `${IC.check}<span>${msg}</span>`;
@@ -117,14 +117,21 @@ function renderHeader(active) {
       </a>
       <nav class="main-nav">${links}</nav>
       <div class="header-actions">
-        <button class="icon-btn" aria-label="Ara">${IC.search}</button>
+        <button class="icon-btn" type="button" aria-label="Ara" aria-expanded="false" id="search-toggle" onclick="toggleSearch()">${IC.search}</button>
         <a href="account.html?tab=favorites" class="icon-btn" aria-label="Favorilerim">${IC.heart}<span class="cart-count wish-count"></span></a>
         <a href="account.html" class="icon-btn" aria-label="${Auth.isLoggedIn()?'Hesabım':'Giriş Yap'}" title="${Auth.isLoggedIn()?('Merhaba, '+Auth.current().name):'Giriş Yap'}">${IC.user}${Auth.isLoggedIn()?'<span class="acct-dot"></span>':''}</a>
         <a href="cart.html" class="icon-btn" aria-label="Sepet">${IC.bag}<span class="cart-count"></span></a>
       </div>
     </div>
+    <form class="search-bar" id="search-bar" action="shop.html" role="search">
+      <div class="wrap search-bar-inner">
+        ${IC.search}
+        <input type="search" name="q" id="search-input" placeholder="Ürün, renk veya malzeme ara…" aria-label="Ürün ara" autocomplete="off" value="${escapeAttr(qs("q") || "")}">
+        <button class="btn btn-ghost-dark btn-sm" type="submit">Ara</button>
+      </div>
+    </form>
   </header>
-  <div class="scrim" onclick="toggleMenu(false)"></div>
+  <div class="scrim" onclick="closeOverlays()"></div>
   <nav class="mobile-nav">
     <button class="close" onclick="toggleMenu(false)" aria-label="Kapat">${IC.close}</button>
     ${mlinks}
@@ -140,6 +147,21 @@ function toggleMenu(open) {
   document.querySelector(".scrim")?.classList.toggle("open", open);
   document.body.style.overflow = open ? "hidden" : "";
 }
+
+function toggleSearch(open) {
+  const bar = document.getElementById("search-bar");
+  if (!bar) return;
+  const next = (open === undefined) ? !bar.classList.contains("open") : open;
+  bar.classList.toggle("open", next);
+  document.getElementById("search-toggle")?.setAttribute("aria-expanded", next);
+  if (next) document.getElementById("search-input")?.focus();
+}
+function closeOverlays() {
+  toggleMenu(false);
+  toggleFilters(false);
+  toggleSearch(false);
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeOverlays(); });
 
 function renderFooter() {
   const html = `
@@ -205,12 +227,13 @@ function swatchDots(colors) {
 }
 function productCard(p) {
   const img = p.images[p.colors[0]];
+  const alt = p.gallery[1];
   return `
   <article class="product-card">
     <div class="thumb">
       ${p.badge ? `<span class="badge">${p.badge}</span>` : ""}
       <button class="wish ${(typeof Wishlist!=="undefined"&&Wishlist.has(p.id))?'active':''}" data-id="${p.id}" aria-label="Favorilere ekle" onclick="event.preventDefault();toggleWish('${p.id}')">${IC.heart}</button>
-      <a href="product.html?id=${p.id}"><img src="${img}" alt="${p.name}" loading="lazy"></a>
+      <a href="product.html?id=${p.id}" aria-label="${p.name}"><img src="${img}" alt="${p.name}" loading="lazy" decoding="async">${alt ? `<img class="thumb-alt" src="${alt.src}" alt="" loading="lazy" decoding="async">` : ""}</a>
       <div class="quick-add"><button class="btn btn-solid btn-sm btn-block" onclick="quickAdd('${p.id}')">Sepete Ekle</button></div>
     </div>
     <div class="product-info">
@@ -240,6 +263,7 @@ function initReveal() {
 
 /* ---------- Query helper ---------- */
 function qs(name) { return new URLSearchParams(location.search).get(name); }
+function escapeAttr(s) { return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
 
 /* ============================================================
    PAGE CONTROLLERS
@@ -265,30 +289,38 @@ function initHome() {
   // featured products
   const prodMount = document.getElementById("home-products");
   if (prodMount) {
-    const featured = PRODUCTS.filter(p=>["biker-noir","aviator-shear","moto-tan","trench-espr","cafe-racer","cropped-tan","long-coat","quilted-moto"].includes(p.id)).slice(0,8);
+    const featured = PRODUCTS.filter(p=>["turuncu-suet-biker","bordo-kruvaze-blazer","siyah-puskullu-biker","yilan-desenli-ceket","taba-suet-blazer","zeytin-deri-parka","siyah-orgu-bomber","kahve-eskitme-ceket"].includes(p.id)).slice(0,8);
     prodMount.innerHTML = featured.map(productCard).join("");
   }
 }
 
 /* ---- SHOP LISTING ---- */
-const ShopState = { cat:"all", colors:new Set(), materials:new Set(), maxPrice: 25000, sort:"pop" };
+const ShopState = { cat:"all", colors:new Set(), materials:new Set(), maxPrice: 25000, sort:"pop", q:"" };
+/* Türkçe karakter ve büyük/küçük harf farkını yok sayarak arama */
+function foldText(s) { return (s || "").toLocaleLowerCase("tr").replace(/ı/g, "i").normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+function matchesSearch(p, q) {
+  const hay = foldText([p.name, p.material, ...p.colors.map(c => LEATHER_TONES[c].name)].join(" "));
+  return foldText(q).split(/\s+/).filter(Boolean).every(w => hay.includes(w));
+}
 function initShop() {
   const grid = document.getElementById("shop-grid");
   if (!grid) return;
   const urlCat = qs("cat");
   if (urlCat) ShopState.cat = urlCat;
+  ShopState.q = (qs("q") || "").trim();
 
   // title
-  const titles = { all:"Tüm Koleksiyon", kadin:"Kadın Deri Ceket", erkek:"Erkek Deri Ceket", aksesuar:"Aksesuar" };
+  const titles = { all:"Tüm Koleksiyon", kadin:"Kadın Koleksiyonu", erkek:"Erkek Koleksiyonu", aksesuar:"Aksesuar" };
   const titleEl = document.getElementById("shop-title");
   const crumbEl = document.getElementById("shop-crumb");
-  if (titleEl) titleEl.textContent = titles[ShopState.cat] || "Koleksiyon";
-  if (crumbEl) crumbEl.textContent = titles[ShopState.cat] || "Koleksiyon";
+  const heading = ShopState.q ? `“${ShopState.q}” için sonuçlar` : (titles[ShopState.cat] || "Koleksiyon");
+  if (titleEl) titleEl.textContent = heading;
+  if (crumbEl) crumbEl.textContent = heading;
 
   // build color filter dynamically
   const allColors = [...new Set(PRODUCTS.flatMap(p=>p.colors))];
   const colorMount = document.getElementById("filter-colors");
-  if (colorMount) colorMount.innerHTML = allColors.map(c=>`<span class="color-dot" style="background:${LEATHER_TONES[c].hex}" title="${LEATHER_TONES[c].name}" data-color="${c}" onclick="toggleColor('${c}',this)"></span>`).join("");
+  if (colorMount) colorMount.innerHTML = allColors.map(c=>`<button type="button" class="color-dot" style="background:${LEATHER_TONES[c].hex}" title="${LEATHER_TONES[c].name}" aria-label="${LEATHER_TONES[c].name}" data-color="${c}" onclick="toggleColor('${c}',this)"></button>`).join("");
 
   // category filter list
   const catMount = document.getElementById("filter-cats");
@@ -308,6 +340,7 @@ function renderShop() {
   let list = PRODUCTS.slice();
   if (ShopState.cat!=="all" && ["kadin","erkek"].includes(ShopState.cat)) list = list.filter(p=>p.cat===ShopState.cat);
   else if (ShopState.cat==="aksesuar") list = [];
+  if (ShopState.q) list = list.filter(p=>matchesSearch(p, ShopState.q));
   if (ShopState.colors.size) list = list.filter(p=>p.colors.some(c=>ShopState.colors.has(c)));
   if (ShopState.materials.size) list = list.filter(p=>ShopState.materials.has(p.material));
   list = list.filter(p=>p.price<=ShopState.maxPrice);
@@ -316,18 +349,19 @@ function renderShop() {
   const grid = document.getElementById("shop-grid");
   const count = document.getElementById("result-count");
   if (count) count.textContent = `${list.length} ürün bulundu`;
-  grid.innerHTML = list.length ? list.map(productCard).join("") : `<div class="empty-state" style="grid-column:1/-1">${IC.bag}<h3>Ürün bulunamadı</h3><p>Bu kategoride henüz ürün yok. Filtreleri değiştirmeyi deneyin.</p></div>`;
+  grid.innerHTML = list.length ? list.map(productCard).join("") : `<div class="empty-state" style="grid-column:1/-1">${IC.bag}<h3>Ürün bulunamadı</h3><p>${ShopState.q ? "Aramanızla eşleşen ürün yok. Farklı bir kelime deneyin." : "Bu seçimde ürün yok. Filtreleri değiştirmeyi deneyin."}</p><a href="shop.html" class="btn btn-outline btn-sm">Tüm Ürünler</a></div>`;
 }
 function toggleFilters(open){ document.querySelector(".filters")?.classList.toggle("open", open); document.querySelector(".scrim")?.classList.toggle("open", open); }
 
 /* ---- PRODUCT DETAIL ---- */
-let PDP = { product:null, color:null, size:null, qty:1 };
+let PDP = { product:null, color:null, size:null, qty:1, view:0 };
 function initProduct() {
   const mount = document.getElementById("pdp-root");
   if (!mount) return;
   const id = qs("id") || PRODUCTS[0].id;
   const p = PRODUCTS.find(x=>x.id===id) || PRODUCTS[0];
-  PDP.product = p; PDP.color = p.colors[0]; PDP.size = null; PDP.qty = 1;
+  PDP.product = p; PDP.color = p.colors[0]; PDP.size = null; PDP.qty = 1; PDP.view = 0;
+  document.title = `${p.name} · UNDO`;
 
   document.getElementById("pdp-crumb").textContent = p.name;
   document.getElementById("pdp-crumb-cat").textContent = p.cat==="kadin"?"Kadın":p.cat==="erkek"?"Erkek":"Koleksiyon";
@@ -339,9 +373,10 @@ function initProduct() {
 }
 function renderPDP() {
   const p = PDP.product;
-  const mainImg = p.images[PDP.color];
-  document.getElementById("pdp-main").innerHTML = `<img src="${mainImg}" alt="${p.name} - ${LEATHER_TONES[PDP.color].name}">`;
-  document.getElementById("pdp-thumbs").innerHTML = p.colors.map(c=>`<button class="${c===PDP.color?'active':''}" onclick="setColor('${c}')"><img src="${p.images[c]}" alt="${LEATHER_TONES[c].name}"></button>`).join("");
+  const shot = p.gallery[PDP.view] || p.gallery[0];
+  document.getElementById("pdp-main").innerHTML = `<img src="${shot.src}" alt="${p.name} — ${shot.label}">`;
+  document.getElementById("pdp-thumbs").innerHTML = p.gallery.map((g,i)=>`<button type="button" class="${i===PDP.view?'active':''}" aria-label="${g.label} görünümü" ${i===PDP.view?'aria-current="true"':''} onclick="setView(${i})"><img src="${g.src}" alt=""></button>`).join("");
+  document.getElementById("pdp-thumbs").hidden = p.gallery.length < 2;
 
   document.getElementById("pdp-name").textContent = p.name;
   const _r = pdpRating(p);
@@ -349,7 +384,7 @@ function renderPDP() {
   document.getElementById("pdp-price").innerHTML = `${p.old?`<span class="old">${TL(p.old)}</span>`:""}${TL(p.price)}`;
   document.getElementById("pdp-desc").textContent = p.desc;
   document.getElementById("pdp-colorname").textContent = LEATHER_TONES[PDP.color].name;
-  document.getElementById("pdp-colors").innerHTML = p.colors.map(c=>`<span class="color-dot ${c===PDP.color?'active':''}" style="background:${LEATHER_TONES[c].hex}" title="${LEATHER_TONES[c].name}" onclick="setColor('${c}')"></span>`).join("");
+  document.getElementById("pdp-colors").innerHTML = p.colors.map(c=>`<button type="button" class="color-dot ${c===PDP.color?'active':''}" style="background:${LEATHER_TONES[c].hex}" title="${LEATHER_TONES[c].name}" aria-label="${LEATHER_TONES[c].name}" onclick="setColor('${c}')"></button>`).join("");
   document.getElementById("pdp-sizes").innerHTML = p.sizes.map(s=>`<button class="size-btn ${s===PDP.size?'active':''}" onclick="setSize('${s}')">${s}</button>`).join("");
   document.getElementById("pdp-qty").value = PDP.qty;
 
@@ -358,8 +393,8 @@ function renderPDP() {
   document.getElementById("tab-specs").innerHTML = `<ul>
     <li>%100 Hakiki ${p.material}</li>
     <li>El işçiliği ile üretim</li>
-    <li>Çıkarılabilir iç astar / cepler</li>
-    <li>Dayanıklı YKK metal fermuar ve aksesuarlar</li>
+    <li>Astarlı iç yüzey</li>
+    <li>Dayanıklı metal aksesuarlar</li>
     <li>Renk: ${LEATHER_TONES[PDP.color].name}</li>
     <li>Bakım: Nemli bezle silin, deri kremi ile besleyin</li>
   </ul>`;
@@ -432,7 +467,8 @@ function renderReviews(p) {
 
   mount.innerHTML = summary + form + `<div class="rev-list">${reviews}</div>`;
 }
-function setColor(c){ PDP.color=c; renderPDP(); }
+function setColor(c){ PDP.color=c; if (!PDP.product.views) PDP.view=PDP.product.colors.indexOf(c); renderPDP(); }
+function setView(i){ PDP.view=i; renderPDP(); }
 function setSize(s){ PDP.size=s; renderPDP(); }
 function pdpQty(delta){ PDP.qty=Math.max(1,PDP.qty+delta); document.getElementById("pdp-qty").value=PDP.qty; }
 function pdpAddToCart(buyNow){
