@@ -8,7 +8,7 @@ const IC = {
   search:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
   user:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/></svg>',
   bag:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 8h12l1 12H5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
-  heart:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20s-7-4.3-9.3-8.5C1.2 8.8 2.7 5.5 6 5.5c2 0 3.2 1.2 4 2.4.8-1.2 2-2.4 4-2.4 3.3 0 4.8 3.3 3.3 6C19 15.7 12 20 12 20Z"/></svg>',
+  heart:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
   menu:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
   close:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   arrow:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
@@ -97,6 +97,7 @@ function toast(msg) {
 
 /* ---------- Header & Footer (shared) ---------- */
 const NAV = [
+  { href: "shop.html", label: "Tüm Ürünler" },
   { href: "shop.html?cat=kadin", label: "Kadın" },
   { href: "shop.html?cat=erkek", label: "Erkek" },
   { href: "shop.html?cat=aksesuar", label: "Aksesuar" },
@@ -105,6 +106,9 @@ const NAV = [
 ];
 
 function renderHeader(active) {
+  if (document.body.dataset.page === "shop") {
+    active = { kadin: "Kadın", erkek: "Erkek", aksesuar: "Aksesuar" }[qs("cat")] || "Tüm Ürünler";
+  }
   const links = NAV.map(n => `<a href="${n.href}" class="${active===n.label?'active':''}">${n.label}</a>`).join("");
   const mlinks = NAV.map(n => `<a href="${n.href}">${n.label}</a>`).join("");
   const html = `
