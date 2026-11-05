@@ -1,0 +1,149 @@
+/* ============================================================
+   UNDO — Yönetim Paneli
+   style.css token'larını kullanır; yalnızca panele özgü kurallar.
+   ============================================================ */
+body.admin { background: var(--cream); }
+
+/* ---------- Üst bar ---------- */
+.adm-header { position: sticky; top: 0; z-index: 60; background: var(--ink); color: var(--on-dark); border-bottom: 1px solid rgba(244,241,234,.1); }
+.adm-header-inner { max-width: 1400px; margin-inline: auto; padding: 14px clamp(16px, 3vw, 36px); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.adm-brand { display: flex; align-items: center; gap: 18px; }
+.adm-brand .mark { font-family: "Jost", var(--sans); font-size: 22px; font-weight: 300; letter-spacing: .3em; text-transform: uppercase; }
+.adm-brand-txt { font-size: 13px; font-weight: 500; padding-left: 18px; border-left: 1px solid rgba(244,241,234,.2); color: var(--on-dark-soft); }
+.adm-brand-txt small { display: none; }
+.adm-header-actions { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.adm-header .btn-outline { color: var(--on-dark); border-color: rgba(244,241,234,.4); }
+.adm-header .btn-outline:hover { background: var(--on-dark); color: var(--ink); border-color: var(--on-dark); }
+.save-status { font-size: 12px; display: inline-flex; align-items: center; gap: 8px; color: var(--on-dark-soft); }
+.save-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #6fae7a; }
+.save-status.is-dirty { color: #f0d9b0; }
+.save-status.is-dirty::before { background: var(--caramel); }
+
+/* ---------- Yerleşim ---------- */
+.adm-main { max-width: 1400px; margin-inline: auto; padding: 28px clamp(16px, 3vw, 36px) 72px; }
+
+.adm-stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 28px; }
+.adm-stat { background: var(--paper); padding: 18px 20px; }
+.adm-stat-num { font-family: var(--serif); font-size: 26px; line-height: 1.1; color: var(--tan-deep); font-variant-numeric: tabular-nums; }
+.adm-stat-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-soft); margin-top: 6px; }
+
+.adm-tabs { display: flex; gap: 30px; border-bottom: 1px solid var(--line); margin-bottom: 26px; overflow-x: auto; scrollbar-width: none; }
+.adm-tab { padding: 14px 0; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; color: var(--text-mute); position: relative; white-space: nowrap; flex-shrink: 0; transition: color .25s; }
+.adm-tab:hover { color: var(--text); }
+.adm-tab.active { color: var(--text); }
+.adm-tab.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--ink); }
+.adm-panel { display: none; }
+.adm-panel.active { display: block; }
+
+/* ---------- Ürünler ---------- */
+.adm-split { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 26px; align-items: start; }
+.adm-list-col { position: sticky; top: 84px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); display: flex; flex-direction: column; max-height: calc(100vh - 110px); }
+.adm-list-head { padding: 14px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.adm-list-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.adm-list-filters input, .adm-list-filters select { width: 100%; min-width: 0; padding: 9px 10px; font-size: 13px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--cream); outline-offset: 1px; }
+.adm-list-count { font-size: 12px; color: var(--text-soft); }
+.adm-list { overflow-y: auto; min-height: 120px; }
+.adm-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 14px; text-align: left; border-bottom: 1px solid var(--line); border-left: 3px solid transparent; transition: background .2s; }
+.adm-item:hover { background: var(--cream); }
+.adm-item.active { background: var(--cream-2); border-left-color: var(--tan); }
+.adm-item-thumb { width: 42px; height: 52px; flex-shrink: 0; background: #fffefb; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.adm-item-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.adm-item-info { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.adm-item-info strong { font-size: 13px; font-weight: 600; line-height: 1.3; }
+.adm-item-info small { font-size: 12px; color: var(--text-soft); }
+.adm-empty { padding: 28px 14px; text-align: center; color: var(--text-soft); font-size: 14px; }
+
+.adm-form-wrap { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(18px, 2.4vw, 30px); min-width: 0; }
+.adm-placeholder { text-align: center; padding: 70px 20px; }
+.adm-placeholder h3 { font-size: 24px; margin-bottom: 8px; }
+.adm-form-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.adm-form-head h2 { font-size: clamp(22px, 2.4vw, 28px); }
+.adm-link { font-size: 13px; color: var(--tan); }
+.adm-link:hover { color: var(--tan-deep); text-decoration: underline; }
+.adm-error { background: #f9e9e6; border: 1px solid #e6bdb5; color: #8c2f20; padding: 11px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 18px; overflow-wrap: anywhere; }
+.adm-error[hidden] { display: none; }
+.adm-form .field small { font-weight: 400; color: var(--text-mute); }
+.adm-form .field input, .adm-form .field select, .adm-form .field textarea { width: 100%; padding: 11px 13px; border: 1px solid var(--line); background: #fffefb; border-radius: var(--radius); font-size: 14px; }
+.adm-form .field textarea { resize: vertical; line-height: 1.5; }
+.adm-form .field input:focus, .adm-form .field select:focus, .adm-form .field textarea:focus { border-color: var(--tan); }
+.adm-form .field input[readonly] { background: var(--cream-2); color: var(--text-soft); }
+
+.adm-group { border: none; border-top: 1px solid var(--line); margin-top: 22px; padding-top: 18px; min-width: 0; }
+.adm-group legend { float: left; width: 100%; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+.adm-group legend + * { clear: both; }
+.adm-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.adm-chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 11px; font-size: 13px; border: 1px solid var(--line); border-radius: 999px; background: #fffefb; cursor: pointer; transition: border-color .2s, background .2s; }
+.adm-chip:hover { border-color: var(--text-mute); }
+.adm-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+.adm-chip:has(input:checked) { background: var(--ink); border-color: var(--ink); color: var(--on-dark); }
+.adm-chip:has(input:focus-visible) { outline: 2px solid var(--caramel); outline-offset: 2px; }
+.adm-dot { width: 13px; height: 13px; border-radius: 50%; border: 1px solid rgba(128,128,128,.45); flex-shrink: 0; }
+.adm-hint { font-size: 13px; color: var(--text-soft); margin-bottom: 12px; line-height: 1.55; }
+.adm-hint code, .adm-card code { font-size: 12px; background: var(--cream-2); padding: 1px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+.adm-previews { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.adm-previews:empty { display: none; }
+.adm-previews figure { width: 84px; }
+.adm-previews img { width: 100%; aspect-ratio: 4/5; object-fit: contain; background: #fffefb; border: 1px solid var(--line); border-radius: var(--radius); }
+.adm-previews figcaption { font-size: 11px; color: var(--text-soft); text-align: center; margin-top: 4px; }
+.adm-previews .missing img { visibility: hidden; }
+.adm-previews .missing { position: relative; }
+.adm-previews .missing::before { content: "Dosya yok"; position: absolute; top: 0; left: 0; right: 0; aspect-ratio: 4/5; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; color: #8c2f20; background: #f9e9e6; border: 1px dashed #e6bdb5; border-radius: var(--radius); }
+
+.adm-form-actions { display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--line); margin-top: 24px; padding-top: 20px; }
+.adm-form-actions .danger-btn { margin-left: auto; }
+.danger-btn { color: #a63a2a; border-color: #d9a59c; }
+.danger-btn:hover { background: #a63a2a; border-color: #a63a2a; color: #fff; }
+.danger-solid { background: #a63a2a; }
+.danger-solid:hover { background: #862c1f; }
+
+/* ---------- Tonlar ---------- */
+.adm-section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; }
+.adm-section-head h2 { font-size: 26px; margin-bottom: 6px; }
+.adm-section-head p { max-width: 620px; font-size: 14px; }
+.adm-tones { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.adm-tone { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); }
+.adm-tone input[type=color] { width: 44px; height: 44px; padding: 2px; border: 1px solid var(--line); border-radius: var(--radius); background: #fffefb; cursor: pointer; flex-shrink: 0; }
+.adm-tone-info { flex: 1; min-width: 0; }
+.adm-tone-info input { width: 100%; padding: 6px 8px; font-size: 14px; font-weight: 600; border: 1px solid transparent; border-radius: var(--radius); background: transparent; }
+.adm-tone-info input:hover, .adm-tone-info input:focus { border-color: var(--line); background: #fffefb; }
+.adm-tone-info small { display: block; padding-left: 8px; font-size: 12px; color: var(--text-soft); }
+.adm-icon-btn { width: 36px; height: 36px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--text-soft); border-radius: var(--radius); transition: color .2s, background .2s; }
+.adm-icon-btn svg { width: 18px; height: 18px; }
+.adm-icon-btn:hover:not(:disabled) { color: #a63a2a; background: #f9e9e6; }
+.adm-icon-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+/* ---------- Yedekleme ---------- */
+.adm-backup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.adm-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; }
+.adm-card h3 { font-size: 20px; margin-bottom: 10px; }
+.adm-card .tag { font-family: var(--sans); font-size: 11px; font-weight: 500; background: var(--cream-2); color: var(--text-soft); padding: 2px 7px; border-radius: 3px; vertical-align: middle; }
+.adm-card p { font-size: 14px; line-height: 1.6; flex: 1; margin-bottom: 18px; }
+.adm-card.danger { border-color: #e6bdb5; }
+.adm-card-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ---------- Onay penceresi ---------- */
+.adm-modal-scrim { position: fixed; inset: 0; z-index: 150; background: rgba(8,7,6,.55); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.adm-modal { width: min(440px, 100%); background: var(--paper); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); }
+.adm-modal h3 { font-size: 22px; margin-bottom: 10px; }
+.adm-modal p { font-size: 14px; color: var(--text-soft); line-height: 1.6; margin-bottom: 22px; overflow-wrap: anywhere; }
+.adm-modal-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+/* ---------- Duyarlı ---------- */
+@media (max-width: 1100px) {
+  .adm-stats { grid-template-columns: repeat(3, 1fr); }
+  .adm-backup-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .adm-split { grid-template-columns: 1fr; }
+  .adm-list-col { position: static; max-height: 380px; }
+  .adm-form-wrap { scroll-margin-top: 80px; }
+}
+@media (max-width: 560px) {
+  .adm-header { position: static; }  /* iki satıra iniyor; yapışkan kalırsa formu kapatır */
+  .adm-stats { grid-template-columns: repeat(2, 1fr); }
+  .adm-brand-txt { display: none; }
+  .adm-form .form-grid { grid-template-columns: 1fr; }
+  .adm-form-actions .btn { flex: 1 1 100%; }
+  .adm-form-actions .danger-btn { margin-left: 0; }
+  .adm-tones { grid-template-columns: 1fr; }
+}

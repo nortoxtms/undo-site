@@ -289,8 +289,9 @@ function initHome() {
   // featured products
   const prodMount = document.getElementById("home-products");
   if (prodMount) {
-    const featured = PRODUCTS.filter(p=>["turuncu-suet-biker","bordo-kruvaze-blazer","siyah-puskullu-biker","yilan-desenli-ceket","taba-suet-blazer","zeytin-deri-parka","siyah-orgu-bomber","kahve-eskitme-ceket"].includes(p.id)).slice(0,8);
-    prodMount.innerHTML = featured.map(productCard).join("");
+    const featured = PRODUCTS.filter(p=>["turuncu-suet-biker","bordo-kruvaze-blazer","siyah-puskullu-biker","yilan-desenli-ceket","taba-suet-blazer","zeytin-deri-parka","siyah-orgu-bomber","kahve-eskitme-ceket"].includes(p.id));
+    const fill = PRODUCTS.filter(p=>!featured.includes(p)).slice(0, Math.max(0, 8 - featured.length));
+    prodMount.innerHTML = [...featured, ...fill].slice(0,8).map(productCard).join("");
   }
 }
 
@@ -308,6 +309,13 @@ function initShop() {
   const urlCat = qs("cat");
   if (urlCat) ShopState.cat = urlCat;
   ShopState.q = (qs("q") || "").trim();
+  // fiyat filtresi katalogdaki en yüksek fiyatı kapsasın (panelden yüksek fiyat girilebilir)
+  const topPrice = Math.max(ShopState.maxPrice, ...PRODUCTS.map(p => p.price));
+  ShopState.maxPrice = topPrice;
+  const priceInput = document.querySelector('.filter-block input[type="range"]');
+  if (priceInput) { priceInput.max = Math.ceil(topPrice / 500) * 500; priceInput.value = priceInput.max; }
+  const priceVal = document.getElementById("price-val");
+  if (priceVal) priceVal.textContent = TL(+(priceInput ? priceInput.max : topPrice));
 
   // title
   const titles = { all:"Tüm Koleksiyon", kadin:"Kadın Koleksiyonu", erkek:"Erkek Koleksiyonu", aksesuar:"Aksesuar" };
