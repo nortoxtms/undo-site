@@ -387,7 +387,7 @@ function initProduct() {
 function renderPDP() {
   const p = PDP.product;
   const shot = p.gallery[PDP.view] || p.gallery[0];
-  document.getElementById("pdp-main").innerHTML = `<img src="${shot.src}" alt="${p.name} — ${shot.label}">`;
+  document.getElementById("pdp-main").innerHTML = `<button type="button" class="main-image-zoom" onclick="openLightbox()" aria-label="Görseli büyüt"><img src="${shot.src}" alt="${p.name} — ${shot.label}"><span class="zoom-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></span></button>`;
   document.getElementById("pdp-thumbs").innerHTML = p.gallery.map((g,i)=>`<button type="button" class="${i===PDP.view?'active':''}" aria-label="${g.label} görünümü" ${i===PDP.view?'aria-current="true"':''} onclick="setView(${i})"><img src="${g.src}" alt=""></button>`).join("");
   document.getElementById("pdp-thumbs").hidden = p.gallery.length < 2;
 
@@ -503,6 +503,129 @@ function renderReviews(p) {
 }
 function setColor(c){ PDP.color=c; if (!PDP.product.views) PDP.view=PDP.product.colors.indexOf(c); renderPDP(); }
 function setView(i){ PDP.view=i; renderPDP(); }
+
+/* ---------- Tam ekran görsel ---------- */
+const LB = { index:0, zoom:1, ox:50, oy:50, touchX:null, touchY:null, lastX:0, lastY:0, moved:false, pinch:null };
+const LB_MAX_ZOOM = 2.5;
+function openLightbox(){
+  LB.index = PDP.product.gallery[PDP.view] ? PDP.view : 0;
+  renderLightbox();
+  document.getElementById("lightbox").hidden = false;
+  document.body.style.overflow = "hidden";
+  document.querySelector("#lightbox .lb-close").focus();
+}
+function closeLightbox(){
+  document.getElementById("lightbox").hidden = true;
+  document.body.style.overflow = "";
+  if (LB.index !== PDP.view) setView(LB.index);
+  document.querySelector(".main-image-zoom")?.focus();
+}
+function renderLightbox(){
+  const g = PDP.product.gallery, shot = g[LB.index];
+  const img = document.getElementById("lb-img");
+  img.src = shot.src;
+  img.alt = `${PDP.product.name} — ${shot.label}`;
+  document.getElementById("lb-caption").textContent = g.length > 1 ? `${shot.label} · ${LB.index+1} / ${g.length}` : shot.label;
+  document.querySelectorAll("#lightbox .lb-nav").forEach(b => { b.hidden = g.length < 2; });
+  LB.ox = LB.oy = 50;
+  applyLightboxOrigin();
+  lightboxZoom(1);
+}
+function applyLightboxOrigin(){
+  LB.ox = Math.min(100, Math.max(0, LB.ox));
+  LB.oy = Math.min(100, Math.max(0, LB.oy));
+  document.getElementById("lb-img").style.transformOrigin = `${LB.ox}% ${LB.oy}%`;
+}
+function lightboxOriginAt(x, y){
+  const img = document.getElementById("lb-img");
+  LB.ox = (x - img.offsetLeft) / img.offsetWidth * 100;
+  LB.oy = (y - img.offsetTop) / img.offsetHeight * 100;
+  applyLightboxOrigin();
+}
+function lightboxZoom(z){
+  LB.zoom = z < 1.05 ? 1 : Math.min(LB_MAX_ZOOM, z);
+  const zoomed = LB.zoom > 1;
+  document.getElementById("lb-img").style.transform = zoomed ? `scale(${LB.zoom})` : "";
+  document.getElementById("lightbox").classList.toggle("zoomed", zoomed);
+  const btn = document.querySelector("#lightbox .lb-zoom");
+  btn.setAttribute("aria-label", zoomed ? "Uzaklaştır" : "Yakınlaştır");
+  btn.setAttribute("aria-pressed", zoomed);
+}
+function lightboxToggleZoom(){ lightboxZoom(LB.zoom > 1 ? 1 : LB_MAX_ZOOM); }
+function lightboxImgClick(e){
+  if (LB.moved) { LB.moved = false; return; }
+  if (LB.zoom === 1) lightboxOriginAt(e.clientX, e.clientY);
+  lightboxToggleZoom();
+}
+function lightboxMouseMove(e){
+  if (LB.zoom > 1 && !e.target.closest("button")) lightboxOriginAt(e.clientX, e.clientY);
+}
+function lightboxWheel(e){
+  e.preventDefault();
+  if (LB.zoom === 1) lightboxOriginAt(e.clientX, e.clientY);
+  lightboxZoom(LB.zoom * (e.deltaY < 0 ? 1.2 : 1/1.2));
+}
+function lightboxStep(d){
+  const n = PDP.product.gallery.length;
+  LB.index = (LB.index + d + n) % n;
+  renderLightbox();
+}
+function lightboxBackdrop(e){
+  if (e.target.id === "lightbox" || e.target.classList.contains("lb-figure")) closeLightbox();
+}
+function touchDistance(t){ return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+function lightboxTouchStart(e){
+  if (e.touches.length === 2) {
+    LB.pinch = { d: touchDistance(e.touches), z: LB.zoom };
+    LB.touchX = null;
+    LB.moved = true;
+    if (LB.zoom === 1) lightboxOriginAt((e.touches[0].clientX + e.touches[1].clientX) / 2, (e.touches[0].clientY + e.touches[1].clientY) / 2);
+    document.getElementById("lb-img").style.transition = "none";
+  } else if (e.touches.length === 1) {
+    LB.touchX = LB.lastX = e.touches[0].clientX;
+    LB.touchY = LB.lastY = e.touches[0].clientY;
+    LB.moved = false;
+  }
+}
+function lightboxTouchMove(e){
+  if (LB.pinch && e.touches.length === 2) { lightboxZoom(LB.pinch.z * touchDistance(e.touches) / LB.pinch.d); return; }
+  if (LB.touchX === null || e.touches.length !== 1) return;
+  const t = e.touches[0];
+  if (Math.hypot(t.clientX - LB.touchX, t.clientY - LB.touchY) > 8) LB.moved = true;
+  if (LB.zoom > 1) {
+    const img = document.getElementById("lb-img");
+    LB.ox -= (t.clientX - LB.lastX) / (LB.zoom - 1) / img.offsetWidth * 100;
+    LB.oy -= (t.clientY - LB.lastY) / (LB.zoom - 1) / img.offsetHeight * 100;
+    applyLightboxOrigin();
+  }
+  LB.lastX = t.clientX;
+  LB.lastY = t.clientY;
+}
+function lightboxTouchEnd(e){
+  if (LB.pinch) {
+    if (e.touches.length < 2) { LB.pinch = null; document.getElementById("lb-img").style.transition = ""; }
+    return;
+  }
+  if (LB.touchX === null || LB.zoom > 1) { LB.touchX = null; return; }
+  const dx = e.changedTouches[0].clientX - LB.touchX;
+  LB.touchX = null;
+  if (Math.abs(dx) > 50 && PDP.product.gallery.length > 1) lightboxStep(dx < 0 ? 1 : -1);
+}
+document.addEventListener("keydown", e => {
+  const box = document.getElementById("lightbox");
+  if (!box || box.hidden) return;
+  if (e.key === "Escape") closeLightbox();
+  else if (e.key === "ArrowLeft" && PDP.product.gallery.length > 1) lightboxStep(-1);
+  else if (e.key === "ArrowRight" && PDP.product.gallery.length > 1) lightboxStep(1);
+  else if (e.key === "+" || e.key === "=") lightboxZoom(LB.zoom * 1.25);
+  else if (e.key === "-") lightboxZoom(LB.zoom / 1.25);
+  else if (e.key === "Tab") {
+    const items = [...box.querySelectorAll("button")].filter(b => !b.hidden);
+    const first = items[0], last = items[items.length-1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+});
 function setSize(s){ PDP.size=s; renderPDP(); }
 function pdpAddToCart(){
   const p = PDP.product;
