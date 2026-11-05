@@ -59,7 +59,8 @@ const Cart = {
   clear() { this.write([]); },
 };
 
-const FREE_SHIP_THRESHOLD = 7500;
+/* Gerçek numara gelince doldurun (ör. "905xxxxxxxxx"): ürün sayfasında soru bağlantısı çıkar */
+const CONTACT = { whatsapp: "" };
 const SHIP_COST = 0; // free shipping in this demo
 
 function updateCartCount() {
@@ -100,14 +101,12 @@ const NAV = [
   { href: "shop.html", label: "Tüm Ürünler" },
   { href: "shop.html?cat=kadin", label: "Kadın" },
   { href: "shop.html?cat=erkek", label: "Erkek" },
-  { href: "shop.html?cat=aksesuar", label: "Aksesuar" },
-  { href: "shop.html", label: "Koleksiyonlar" },
   { href: "about.html", label: "Hakkımızda" },
 ];
 
 function renderHeader(active) {
   if (document.body.dataset.page === "shop") {
-    active = { kadin: "Kadın", erkek: "Erkek", aksesuar: "Aksesuar" }[qs("cat")] || "Tüm Ürünler";
+    active = { kadin: "Kadın", erkek: "Erkek" }[qs("cat")] || "Tüm Ürünler";
   }
   const links = NAV.map(n => `<a href="${n.href}" class="${active===n.label?'active':''}">${n.label}</a>`).join("");
   const mlinks = NAV.map(n => `<a href="${n.href}">${n.label}</a>`).join("");
@@ -190,10 +189,9 @@ function renderFooter() {
         </div>
         <div class="footer-col">
           <h4>Alışveriş</h4>
+          <a href="shop.html">Tüm Ürünler</a>
           <a href="shop.html?cat=kadin">Kadın</a>
           <a href="shop.html?cat=erkek">Erkek</a>
-          <a href="shop.html">Yeni Sezon</a>
-          <a href="shop.html">Koleksiyonlar</a>
         </div>
         <div class="footer-col">
           <h4>Kurumsal</h4>
@@ -238,21 +236,17 @@ function productCard(p) {
       ${p.badge ? `<span class="badge">${p.badge}</span>` : ""}
       <button class="wish ${(typeof Wishlist!=="undefined"&&Wishlist.has(p.id))?'active':''}" data-id="${p.id}" aria-label="Favorilere ekle" onclick="event.preventDefault();toggleWish('${p.id}')">${IC.heart}</button>
       <a href="product.html?id=${p.id}" aria-label="${p.name}"><img src="${img}" alt="${p.name}" loading="lazy" decoding="async">${alt ? `<img class="thumb-alt" src="${alt.src}" alt="" loading="lazy" decoding="async">` : ""}</a>
-      <div class="quick-add"><button class="btn btn-solid btn-sm btn-block" onclick="quickAdd('${p.id}')">Sepete Ekle</button></div>
+      <div class="quick-add"><a class="btn btn-solid btn-sm btn-block" href="product.html?id=${p.id}">Beden Seç</a></div>
     </div>
     <div class="product-info">
       <h3><a href="product.html?id=${p.id}">${p.name}</a></h3>
+      <span class="product-material">${p.material}</span>
       <div class="product-meta">
         <span class="price">${p.old?`<span class="old">${TL(p.old)}</span>`:""}${TL(p.price)}</span>
         <span class="swatch-row">${swatchDots(p.colors)}</span>
       </div>
     </div>
   </article>`;
-}
-function quickAdd(id) {
-  const p = PRODUCTS.find(x=>x.id===id);
-  Cart.add({ id: p.id, name: p.name, price: p.price, color: p.colors[0], colorName: LEATHER_TONES[p.colors[0]].name, size: p.sizes[Math.floor(p.sizes.length/2)], qty: 1, img: p.images[p.colors[0]] });
-  toast(`${p.name} sepete eklendi`);
 }
 
 /* ---------- Reveal on scroll ---------- */
@@ -281,11 +275,9 @@ function initHome() {
     const cats = [
       { key:"kadin", label:"Kadın", tone:"bordo" },
       { key:"erkek", label:"Erkek", tone:"kahve" },
-      { key:"aksesuar", label:"Aksesuar", tone:"konyak" },
-      { key:"koleksiyon", label:"Koleksiyonlar", tone:"siyah" },
     ];
     catMount.innerHTML = cats.map(c=>`
-      <a class="cat-card" href="shop.html${c.key==='kadin'||c.key==='erkek'?'?cat='+c.key:''}">
+      <a class="cat-card" href="shop.html?cat=${c.key}">
         <img class="ph" src="${ASSETS.cat[c.key] || scenePH(c.tone)}" alt="${c.label}">
         <div class="cat-label"><h3>${c.label}</h3><span>Keşfet ${IC.arrow}</span></div>
       </a>`).join("");
@@ -300,7 +292,7 @@ function initHome() {
 }
 
 /* ---- SHOP LISTING ---- */
-const ShopState = { cat:"all", colors:new Set(), materials:new Set(), maxPrice: 25000, sort:"pop", q:"" };
+const ShopState = { cat:"all", colors:new Set(), materials:new Set(), sizes:new Set(), maxPrice: 25000, sort:"pop", q:"" };
 /* Türkçe karakter ve büyük/küçük harf farkını yok sayarak arama */
 function foldText(s) { return (s || "").toLocaleLowerCase("tr").replace(/ı/g, "i").normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
 function matchesSearch(p, q) {
@@ -322,10 +314,11 @@ function initShop() {
   if (priceVal) priceVal.textContent = TL(+(priceInput ? priceInput.max : topPrice));
 
   // title
-  const titles = { all:"Tüm Koleksiyon", kadin:"Kadın Koleksiyonu", erkek:"Erkek Koleksiyonu", aksesuar:"Aksesuar" };
+  const titles = { all:"Tüm Ürünler", kadin:"Kadın Koleksiyonu", erkek:"Erkek Koleksiyonu" };
   const titleEl = document.getElementById("shop-title");
   const crumbEl = document.getElementById("shop-crumb");
   const heading = ShopState.q ? `“${ShopState.q}” için sonuçlar` : (titles[ShopState.cat] || "Koleksiyon");
+  document.title = `${heading} · UNDO`;
   if (titleEl) titleEl.textContent = heading;
   if (crumbEl) crumbEl.textContent = heading;
 
@@ -333,6 +326,14 @@ function initShop() {
   const allColors = [...new Set(PRODUCTS.flatMap(p=>p.colors))];
   const colorMount = document.getElementById("filter-colors");
   if (colorMount) colorMount.innerHTML = allColors.map(c=>`<button type="button" class="color-dot" style="background:${LEATHER_TONES[c].hex}" title="${LEATHER_TONES[c].name}" aria-label="${LEATHER_TONES[c].name}" data-color="${c}" onclick="toggleColor('${c}',this)"></button>`).join("");
+
+  // beden ve malzeme filtreleri katalogdan gelir: boş seçenek çıkmaz
+  const sizeOrder = ["XS","S","M","L","XL","2XL","S/M","L/XL"];
+  const allSizes = [...new Set(PRODUCTS.flatMap(p=>p.sizes))].sort((a,b)=>sizeOrder.indexOf(a)-sizeOrder.indexOf(b));
+  const sizeMount = document.getElementById("filter-sizes");
+  if (sizeMount) sizeMount.innerHTML = allSizes.map(z=>`<button type="button" class="size-chip" aria-pressed="false" onclick="toggleSize('${z}',this)">${z}</button>`).join("");
+  const matMount = document.getElementById("filter-materials");
+  if (matMount) matMount.innerHTML = [...new Set(PRODUCTS.map(p=>p.material))].sort((a,b)=>a.localeCompare(b,"tr")).map(m=>`<div class="filter-opt" onclick="toggleMaterial('${m}',this)"><input type="checkbox" tabindex="-1"> ${m}</div>`).join("");
 
   // category filter list
   const catMount = document.getElementById("filter-cats");
@@ -346,17 +347,18 @@ function initShop() {
 }
 function setCat(k, el) { ShopState.cat=k; document.querySelectorAll("[data-cat]").forEach(x=>{x.classList.remove("active"); x.querySelector("input").checked=false;}); el.classList.add("active"); el.querySelector("input").checked=true; renderShop(); }
 function toggleColor(c, el) { if (ShopState.colors.has(c)) ShopState.colors.delete(c); else ShopState.colors.add(c); el.classList.toggle("active"); renderShop(); }
-function toggleMaterial(m, el) { if (ShopState.materials.has(m)) ShopState.materials.delete(m); else ShopState.materials.add(m); el.classList.toggle("active"); renderShop(); }
+function toggleSize(z, el) { const on=!ShopState.sizes.has(z); if (on) ShopState.sizes.add(z); else ShopState.sizes.delete(z); el.classList.toggle("active",on); el.setAttribute("aria-pressed",on); renderShop(); }
+function toggleMaterial(m, el) { const on=!ShopState.materials.has(m); if (on) ShopState.materials.add(m); else ShopState.materials.delete(m); el.classList.toggle("active",on); el.querySelector("input").checked=on; renderShop(); }
 function setMaxPrice(v) { ShopState.maxPrice=+v; document.getElementById("price-val").textContent=TL(+v); renderShop(); }
 function renderShop() {
   let list = PRODUCTS.slice();
   if (ShopState.cat!=="all" && ["kadin","erkek"].includes(ShopState.cat)) list = list.filter(p=>p.cat===ShopState.cat);
-  else if (ShopState.cat==="aksesuar") list = [];
   if (ShopState.q) list = list.filter(p=>matchesSearch(p, ShopState.q));
   if (ShopState.colors.size) list = list.filter(p=>p.colors.some(c=>ShopState.colors.has(c)));
+  if (ShopState.sizes.size) list = list.filter(p=>p.sizes.some(z=>ShopState.sizes.has(z)));
   if (ShopState.materials.size) list = list.filter(p=>ShopState.materials.has(p.material));
   list = list.filter(p=>p.price<=ShopState.maxPrice);
-  const sorters = { pop:(a,b)=>b.reviews-a.reviews, "price-asc":(a,b)=>a.price-b.price, "price-desc":(a,b)=>b.price-a.price, rating:(a,b)=>b.rating-a.rating, new:(a,b)=>(b.badge==="Yeni")-(a.badge==="Yeni") };
+  const sorters = { pop:(a,b)=>hasFrontPhoto(b)-hasFrontPhoto(a) || b.reviews-a.reviews, "price-asc":(a,b)=>a.price-b.price, "price-desc":(a,b)=>b.price-a.price, rating:(a,b)=>b.rating-a.rating, new:(a,b)=>(b.badge==="Yeni")-(a.badge==="Yeni") };
   list.sort(sorters[ShopState.sort]||sorters.pop);
   const grid = document.getElementById("shop-grid");
   const count = document.getElementById("result-count");
@@ -366,13 +368,13 @@ function renderShop() {
 function toggleFilters(open){ document.querySelector(".filters")?.classList.toggle("open", open); document.querySelector(".scrim")?.classList.toggle("open", open); }
 
 /* ---- PRODUCT DETAIL ---- */
-let PDP = { product:null, color:null, size:null, qty:1, view:0 };
+let PDP = { product:null, color:null, size:null, view:0 };
 function initProduct() {
   const mount = document.getElementById("pdp-root");
   if (!mount) return;
   const id = qs("id") || PRODUCTS[0].id;
   const p = PRODUCTS.find(x=>x.id===id) || PRODUCTS[0];
-  PDP.product = p; PDP.color = p.colors[0]; PDP.size = null; PDP.qty = 1; PDP.view = 0;
+  PDP.product = p; PDP.color = p.colors[0]; PDP.size = null; PDP.view = 0;
   document.title = `${p.name} · UNDO`;
 
   document.getElementById("pdp-crumb").textContent = p.name;
@@ -381,7 +383,6 @@ function initProduct() {
 
   renderPDP();
   renderRelated(p);
-  initTabs();
 }
 function renderPDP() {
   const p = PDP.product;
@@ -395,21 +396,42 @@ function renderPDP() {
   document.getElementById("pdp-rating").innerHTML = `${starHTML(_r.rating)} <span>${_r.rating.toFixed(1)} · ${_r.count} değerlendirme</span>`;
   document.getElementById("pdp-price").innerHTML = `${p.old?`<span class="old">${TL(p.old)}</span>`:""}${TL(p.price)}`;
   document.getElementById("pdp-desc").textContent = p.desc;
+  document.getElementById("pdp-material").innerHTML = `<strong>${p.material}</strong> · ${LEATHER_TONES[PDP.color].name}`;
+  document.getElementById("pdp-color-row").hidden = p.colors.length < 2;
   document.getElementById("pdp-colorname").textContent = LEATHER_TONES[PDP.color].name;
   document.getElementById("pdp-colors").innerHTML = p.colors.map(c=>`<button type="button" class="color-dot ${c===PDP.color?'active':''}" style="background:${LEATHER_TONES[c].hex}" title="${LEATHER_TONES[c].name}" aria-label="${LEATHER_TONES[c].name}" onclick="setColor('${c}')"></button>`).join("");
   document.getElementById("pdp-sizes").innerHTML = p.sizes.map(s=>`<button class="size-btn ${s===PDP.size?'active':''}" onclick="setSize('${s}')">${s}</button>`).join("");
-  document.getElementById("pdp-qty").value = PDP.qty;
 
-  // tab content
-  document.getElementById("tab-desc").innerHTML = `<p>${p.desc}</p><p>Her parça, alanında 35 yıllık deneyime sahip ustalarımız tarafından tek tek elden geçirilir. Kullandıkça yumuşayan ve size özel bir patina kazanan hakiki deri, yıllar boyu yanınızda kalacak bir yatırımdır.</p>`;
-  document.getElementById("tab-specs").innerHTML = `<ul>
-    <li>%100 Hakiki ${p.material}</li>
-    <li>El işçiliği ile üretim</li>
-    <li>Astarlı iç yüzey</li>
-    <li>Dayanıklı metal aksesuarlar</li>
-    <li>Renk: ${LEATHER_TONES[PDP.color].name}</li>
-    <li>Bakım: Nemli bezle silin, deri kremi ile besleyin</li>
-  </ul>`;
+  // kalıp notu ve ölçü tablosu
+  const chart = chartOf(p);
+  document.getElementById("pdp-fit").textContent = chart.fit;
+  const rows = p.sizes.filter(z=>chart.rows[z]);
+  document.getElementById("sec-fit").innerHTML = `
+    <p>${chart.fit}</p>
+    ${rows.length ? `<div class="size-table-wrap"><table class="size-table">
+      <thead><tr><th scope="col">Beden</th>${chart.cols.map(c=>`<th scope="col">${c}</th>`).join("")}</tr></thead>
+      <tbody>${rows.map(z=>`<tr class="${z===PDP.size?'active':''}"><th scope="row">${z}</th>${chart.rows[z].map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table></div><p class="size-note">Ölçüler santimetredir, ürün düz zeminde serilerek alınır.</p>` : ""}`;
+
+  // malzeme ve bakım
+  document.getElementById("sec-material").innerHTML = `
+    <p>Her parça, alanında 35 yıllık deneyime sahip ustalarımız tarafından tek tek elden geçirilir. Kullandıkça yumuşayan ve size özel bir patina kazanan hakiki deri, yıllar boyu yanınızda kalır.</p>
+    <ul>
+      <li>%100 Hakiki ${p.material}</li>
+      <li>Renk: ${LEATHER_TONES[PDP.color].name}</li>
+      <li>El işçiliği ile üretim</li>
+      <li>Astarlı iç yüzey</li>
+      <li>Dayanıklı metal aksesuarlar</li>
+    </ul>`;
+  document.getElementById("sec-care").innerHTML = `<ul>${careOf(p).map(c=>`<li>${c}</li>`).join("")}</ul>`;
+
+  // soru kanalı: numara tanımlıysa görünür
+  const contact = document.getElementById("pdp-contact");
+  contact.hidden = !CONTACT.whatsapp;
+  if (CONTACT.whatsapp) {
+    const text = encodeURIComponent(`Merhaba, ${p.name} hakkında bilgi almak istiyorum.`);
+    contact.innerHTML = `Bedeninizden emin değil misiniz? <a href="https://wa.me/${CONTACT.whatsapp}?text=${text}" target="_blank" rel="noopener">Bize yazın</a>`;
+  }
 
   // favori butonu
   const wishBtn = document.getElementById("pdp-wish");
@@ -482,30 +504,18 @@ function renderReviews(p) {
 function setColor(c){ PDP.color=c; if (!PDP.product.views) PDP.view=PDP.product.colors.indexOf(c); renderPDP(); }
 function setView(i){ PDP.view=i; renderPDP(); }
 function setSize(s){ PDP.size=s; renderPDP(); }
-function pdpQty(delta){ PDP.qty=Math.max(1,PDP.qty+delta); document.getElementById("pdp-qty").value=PDP.qty; }
-function pdpAddToCart(buyNow){
+function pdpAddToCart(){
   const p = PDP.product;
   if (!PDP.size) { toast("Lütfen bir beden seçin"); document.getElementById("pdp-sizes").scrollIntoView({behavior:"smooth",block:"center"}); return; }
-  Cart.add({ id:p.id, name:p.name, price:p.price, color:PDP.color, colorName:LEATHER_TONES[PDP.color].name, size:PDP.size, qty:PDP.qty, img:p.images[PDP.color] });
-  if (buyNow) { location.href="cart.html"; return; }
+  Cart.add({ id:p.id, name:p.name, price:p.price, color:PDP.color, colorName:LEATHER_TONES[PDP.color].name, size:PDP.size, qty:1, img:p.images[PDP.color] });
   toast(`${p.name} sepete eklendi`);
 }
 function renderRelated(p) {
   const mount = document.getElementById("pdp-related");
   if (!mount) return;
-  const rel = PRODUCTS.filter(x=>x.id!==p.id && x.cat===p.cat).slice(0,4);
+  const rel = PRODUCTS.filter(x=>x.id!==p.id && x.cat===p.cat && hasFrontPhoto(x)).slice(0,4);
   const fill = PRODUCTS.filter(x=>x.id!==p.id && !rel.includes(x)).slice(0,4-rel.length);
   mount.innerHTML = [...rel, ...fill].slice(0,4).map(productCard).join("");
-}
-function initTabs() {
-  document.querySelectorAll(".tab-nav button").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      document.querySelectorAll(".tab-nav button").forEach(b=>b.classList.remove("active"));
-      document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById(btn.dataset.tab).classList.add("active");
-    });
-  });
 }
 
 /* ---- CART ---- */
@@ -551,12 +561,11 @@ function renderSummary(context) {
   const sub = Cart.subtotal();
   const el = document.getElementById(context+"-summary");
   if (!el) return;
-  const remaining = Math.max(0, FREE_SHIP_THRESHOLD - sub);
   el.innerHTML = `
     <div class="summary-row"><span>Ara Toplam</span><span>${TL(sub)}</span></div>
     <div class="summary-row"><span>Kargo</span><span>${SHIP_COST===0?"Ücretsiz":TL(SHIP_COST)}</span></div>
     <div class="summary-row total"><span>Toplam</span><span>${TL(sub+SHIP_COST)}</span></div>
-    ${remaining>0?`<div class="free-ship-note">${IC.truck} Ücretsiz kargoya ${TL(remaining)} kaldı</div>`:`<div class="free-ship-note">${IC.check} Ücretsiz kargo kazandınız</div>`}`;
+    <div class="free-ship-note">${IC.truck} Ücretsiz ve sigortalı kargo</div>`;
 }
 
 /* ---- CHECKOUT ---- */

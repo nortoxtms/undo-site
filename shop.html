@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Koleksiyon · UNDO</title>
+<title>Tüm Ürünler · UNDO</title>
 <meta name="description" content="Hakiki deri ceket ve palto koleksiyonu. Kadın ve erkek için el yapımı deri giyim.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#0c0b0a">
@@ -12,17 +12,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body data-page="shop" data-nav="Koleksiyonlar">
+<body data-page="shop" data-nav="Tüm Ürünler">
 <div id="site-header"></div>
 
 <div class="wrap">
   <nav class="breadcrumb">
     <a href="index.html">Ana Sayfa</a><span class="sep">/</span>
-    <span class="current" id="shop-crumb">Koleksiyon</span>
+    <span class="current" id="shop-crumb">Tüm Ürünler</span>
   </nav>
 
   <div class="shop-head">
-    <h1 id="shop-title">Tüm Koleksiyon</h1>
+    <h1 id="shop-title">Tüm Ürünler</h1>
     <p>Hakiki deriden, ustalıkla üretilmiş zamansız parçalar.</p>
   </div>
 
@@ -35,15 +35,16 @@
         <div id="filter-cats"></div>
       </div>
       <div class="filter-block">
+        <h4>Beden</h4>
+        <div class="size-opts" id="filter-sizes"></div>
+      </div>
+      <div class="filter-block">
         <h4>Renk</h4>
         <div class="color-opts" id="filter-colors"></div>
       </div>
       <div class="filter-block">
         <h4>Malzeme</h4>
-        <div class="filter-opt" onclick="toggleMaterial('Dana Derisi',this)"><input type="checkbox"> Dana Derisi</div>
-        <div class="filter-opt" onclick="toggleMaterial('Kuzu Derisi',this)"><input type="checkbox"> Kuzu Derisi</div>
-        <div class="filter-opt" onclick="toggleMaterial('Koyun Derisi',this)"><input type="checkbox"> Koyun Derisi</div>
-        <div class="filter-opt" onclick="toggleMaterial('Süet Deri',this)"><input type="checkbox"> Süet Deri</div>
+        <div id="filter-materials"></div>
       </div>
       <div class="filter-block">
         <h4>Fiyat</h4>
