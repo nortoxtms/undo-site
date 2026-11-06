@@ -98,6 +98,15 @@ h1,h2,h3,h4 { font-family: var(--serif); font-weight: 500; line-height: 1.08; le
   padding: 9px 16px; border-bottom: 1px solid rgba(244,241,234,.08);
   color: var(--on-dark-soft);
 }
+/* Dil seçici */
+.topbar { position: relative; padding-inline: 96px; }
+.lang-switch { display: flex; align-items: center; gap: 2px; letter-spacing: .1em; }
+.topbar .lang-switch { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); }
+.lang-switch button { padding: 2px 7px; font-size: 11px; font-weight: 600; letter-spacing: inherit; color: var(--on-dark-soft); transition: color .25s; }
+.lang-switch button:hover { color: var(--on-dark); }
+.lang-switch button.active { color: var(--on-dark); text-decoration: underline; text-underline-offset: 4px; }
+.mobile-nav .lang-switch { margin-top: 26px; gap: 8px; }
+.mobile-nav .lang-switch button { min-width: 44px; min-height: 44px; font-size: 13px; }
 .site-header {
   position: sticky; top: 0; z-index: 60;
   background: var(--ink); color: var(--on-dark);
@@ -754,6 +763,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 @media (max-width: 720px) {
   .topbar { letter-spacing: .12em; font-size: 10px; padding: 8px 12px; }
+  .topbar .lang-switch { display: none; }
   .shop-toolbar { flex-wrap: wrap; gap: 12px; }
   .result-count { order: 3; width: 100%; }
   .cart-row { grid-template-columns: 76px 1fr; }
@@ -880,5 +890,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .size-chip.active { background: var(--ink); border-color: var(--ink); color: var(--on-dark); }
 .field label small { font-weight: 400; color: var(--text-mute); }
 @media (max-width: 720px) {
-  .pdp-section { grid-template-columns: 1fr; gap: 16px; padding: 28px 0; }
+  .pdp-section { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 28px 0; }
+  .size-table th, .size-table td { padding: 11px 8px; }
+  .size-table thead th { letter-spacing: .04em; }
 }
