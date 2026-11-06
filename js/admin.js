@@ -208,7 +208,7 @@ function renderForm() {
         <div class="field"><label for="f-rating">Puan (0–5)</label><input id="f-rating" name="rating" type="number" min="0" max="5" step="0.1" value="${esc(p.rating)}"></div>
         <div class="field"><label for="f-reviews">Değerlendirme sayısı</label><input id="f-reviews" name="reviews" type="number" min="0" step="1" value="${esc(p.reviews)}"></div>
         <div class="field"><label for="f-badge">Etiket</label><select id="f-badge" name="badge"><option value="">Etiket yok</option>${selectOptions([...new Set([...BADGES, ...(p.badge ? [p.badge] : [])])].map(b => [b, b]), p.badge)}</select></div>
-        <div class="field"><label for="f-type">Yer tutucu kalıbı <small>(fotoğraf yoksa)</small></label><select id="f-type" name="type">${selectOptions(Object.entries(TYPES), p.type)}</select></div>
+        <div class="field"><label for="f-type">Ürün türü <small>(filtre ve ölçü tablosu)</small></label><select id="f-type" name="type">${selectOptions(Object.entries(PRODUCT_KINDS), kindOf(p))}</select></div>
         <div class="field full"><label for="f-desc">Açıklama</label><textarea id="f-desc" name="desc" rows="3" maxlength="400">${esc(p.desc)}</textarea></div>
       </div>
 
@@ -300,9 +300,11 @@ async function saveProduct(form, isNew, original) {
   if (missing.length) { formError(`Dosya bulunamadı: ${missing.join(", ")}`); return; }
   formError("");
 
+  // pantolon, elbise ve pelerin kendi ölçü tablosunu kullanır; yer tutucu kalıbı olarak "coat" kalır
+  const kind = f.type.value;
   const product = cleanProduct({
-    id, name, price, old, rating, reviews, colors, sizes, views, chart: isNew ? undefined : original.chart,
-    cat: f.cat.value, type: f.type.value, material: f.material.value,
+    id, name, price, old, rating, reviews, colors, sizes, views, chart: TYPES[kind] ? undefined : kind,
+    cat: f.cat.value, type: TYPES[kind] ? kind : "coat", material: f.material.value,
     badge: f.badge.value || null, desc: plainText(f.desc.value),
   });
   const before = State.products.slice();
