@@ -292,7 +292,7 @@ function initHome() {
 }
 
 /* ---- SHOP LISTING ---- */
-const ShopState = { cat:"all", colors:new Set(), materials:new Set(), sizes:new Set(), maxPrice: 25000, sort:"pop", q:"" };
+const ShopState = { cat:"all", kinds:new Set(), colors:new Set(), materials:new Set(), sizes:new Set(), maxPrice: 25000, topPrice: 25000, sort:"pop", q:"" };
 /* Türkçe karakter ve büyük/küçük harf farkını yok sayarak arama */
 function foldText(s) { return (s || "").toLocaleLowerCase("tr").replace(/ı/g, "i").normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
 function matchesSearch(p, q) {
@@ -305,35 +305,41 @@ function initShop() {
   const urlCat = qs("cat");
   if (urlCat) ShopState.cat = urlCat;
   ShopState.q = (qs("q") || "").trim();
+  // seçimler adreste durur: ürüne gidip geri dönünce kaybolmaz; katalogda olmayan değer yok sayılır
+  const params = new URLSearchParams(location.search);
+  const pick = (name, allowed) => new Set(params.getAll(name).filter(v => allowed.includes(v)));
   // fiyat filtresi katalogdaki en yüksek fiyatı kapsasın (panelden yüksek fiyat girilebilir)
   const topPrice = Math.max(ShopState.maxPrice, ...PRODUCTS.map(p => p.price));
-  ShopState.maxPrice = topPrice;
+  ShopState.topPrice = topPrice;
+  const urlPrice = +params.get("fiyat");
+  ShopState.maxPrice = (urlPrice > 0 && urlPrice < topPrice) ? urlPrice : topPrice;
   const priceInput = document.querySelector('.filter-block input[type="range"]');
-  if (priceInput) { priceInput.max = Math.ceil(topPrice / 500) * 500; priceInput.value = priceInput.max; }
+  if (priceInput) { priceInput.max = Math.ceil(topPrice / 500) * 500; priceInput.value = ShopState.maxPrice < topPrice ? ShopState.maxPrice : priceInput.max; }
   const priceVal = document.getElementById("price-val");
-  if (priceVal) priceVal.textContent = TL(+(priceInput ? priceInput.max : topPrice));
+  if (priceVal) priceVal.textContent = TL(+(priceInput ? priceInput.value : topPrice));
 
-  // title
-  const titles = { all:"Tüm Ürünler", kadin:"Kadın Koleksiyonu", erkek:"Erkek Koleksiyonu" };
-  const titleEl = document.getElementById("shop-title");
-  const crumbEl = document.getElementById("shop-crumb");
-  const heading = ShopState.q ? `“${ShopState.q}” için sonuçlar` : (titles[ShopState.cat] || "Koleksiyon");
-  document.title = `${heading} · UNDO`;
-  if (titleEl) titleEl.textContent = heading;
-  if (crumbEl) crumbEl.textContent = heading;
+  renderShopHeading();
 
   // build color filter dynamically
   const allColors = [...new Set(PRODUCTS.flatMap(p=>p.colors))];
+  ShopState.colors = pick("renk", allColors);
   const colorMount = document.getElementById("filter-colors");
-  if (colorMount) colorMount.innerHTML = allColors.map(c=>`<button type="button" class="color-dot" style="background:${LEATHER_TONES[c].hex}" title="${LEATHER_TONES[c].name}" aria-label="${LEATHER_TONES[c].name}" data-color="${c}" onclick="toggleColor('${c}',this)"></button>`).join("");
+  if (colorMount) colorMount.innerHTML = allColors.map(c=>`<button type="button" class="color-dot ${ShopState.colors.has(c)?'active':''}" style="background:${LEATHER_TONES[c].hex}" title="${LEATHER_TONES[c].name}" aria-label="${LEATHER_TONES[c].name}" data-color="${c}" onclick="toggleColor('${c}',this)"></button>`).join("");
 
-  // beden ve malzeme filtreleri katalogdan gelir: boş seçenek çıkmaz
+  // beden, malzeme ve tür filtreleri katalogdan gelir: boş seçenek çıkmaz
   const sizeOrder = ["XS","S","M","L","XL","2XL","S/M","L/XL"];
   const allSizes = [...new Set(PRODUCTS.flatMap(p=>p.sizes))].sort((a,b)=>sizeOrder.indexOf(a)-sizeOrder.indexOf(b));
+  ShopState.sizes = pick("beden", allSizes);
   const sizeMount = document.getElementById("filter-sizes");
-  if (sizeMount) sizeMount.innerHTML = allSizes.map(z=>`<button type="button" class="size-chip" aria-pressed="false" onclick="toggleSize('${z}',this)">${z}</button>`).join("");
+  if (sizeMount) sizeMount.innerHTML = allSizes.map(z=>`<button type="button" class="size-chip ${ShopState.sizes.has(z)?'active':''}" aria-pressed="${ShopState.sizes.has(z)}" onclick="toggleSize('${z}',this)">${z}</button>`).join("");
+  const allMaterials = [...new Set(PRODUCTS.map(p=>p.material))].sort((a,b)=>a.localeCompare(b,"tr"));
+  ShopState.materials = pick("malzeme", allMaterials);
   const matMount = document.getElementById("filter-materials");
-  if (matMount) matMount.innerHTML = [...new Set(PRODUCTS.map(p=>p.material))].sort((a,b)=>a.localeCompare(b,"tr")).map(m=>`<div class="filter-opt" onclick="toggleMaterial('${m}',this)"><input type="checkbox" tabindex="-1"> ${m}</div>`).join("");
+  if (matMount) matMount.innerHTML = allMaterials.map(m=>`<div class="filter-opt ${ShopState.materials.has(m)?'active':''}" onclick="toggleMaterial('${m}',this)"><input type="checkbox" tabindex="-1" ${ShopState.materials.has(m)?'checked':''}> ${m}</div>`).join("");
+  const allKinds = Object.keys(PRODUCT_KINDS).filter(k=>PRODUCTS.some(p=>kindOf(p)===k));
+  ShopState.kinds = pick("tur", allKinds);
+  const kindMount = document.getElementById("filter-kinds");
+  if (kindMount) kindMount.innerHTML = allKinds.map(k=>`<div class="filter-opt ${ShopState.kinds.has(k)?'active':''}" onclick="toggleKind('${k}',this)"><input type="checkbox" tabindex="-1" ${ShopState.kinds.has(k)?'checked':''}> ${PRODUCT_KINDS[k]}</div>`).join("");
 
   // category filter list
   const catMount = document.getElementById("filter-cats");
@@ -342,10 +348,44 @@ function initShop() {
     catMount.innerHTML = cats.map(([k,l])=>`<div class="filter-opt ${ShopState.cat===k?'active':''}" data-cat="${k}" onclick="setCat('${k}',this)"><input type="radio" name="cat" ${ShopState.cat===k?'checked':''}> ${l}</div>`).join("");
   }
   const sortSel = document.getElementById("sort-select");
-  if (sortSel) sortSel.addEventListener("change", e=>{ ShopState.sort=e.target.value; renderShop(); });
+  if (sortSel) {
+    const urlSort = params.get("sira");
+    if ([...sortSel.options].some(o=>o.value===urlSort)) { ShopState.sort = urlSort; sortSel.value = urlSort; }
+    sortSel.addEventListener("change", e=>{ ShopState.sort=e.target.value; renderShop(); });
+  }
   renderShop();
 }
-function setCat(k, el) { ShopState.cat=k; document.querySelectorAll("[data-cat]").forEach(x=>{x.classList.remove("active"); x.querySelector("input").checked=false;}); el.classList.add("active"); el.querySelector("input").checked=true; renderShop(); }
+function renderShopHeading() {
+  const titles = { all:"Tüm Ürünler", kadin:"Kadın Koleksiyonu", erkek:"Erkek Koleksiyonu" };
+  const heading = ShopState.q ? `“${ShopState.q}” için sonuçlar` : (titles[ShopState.cat] || "Koleksiyon");
+  document.title = `${heading} · UNDO`;
+  const titleEl = document.getElementById("shop-title");
+  const crumbEl = document.getElementById("shop-crumb");
+  if (titleEl) titleEl.textContent = heading;
+  if (crumbEl) crumbEl.textContent = heading;
+  const navLabel = { kadin:"Kadın", erkek:"Erkek" }[ShopState.cat] || "Tüm Ürünler";
+  document.querySelectorAll(".main-nav a").forEach(a=>a.classList.toggle("active", a.textContent===navLabel));
+}
+/* Kaydırıcı çok sık tetiklediği için adres kısa bir beklemeyle güncellenir */
+let shopUrlTimer = null;
+function syncShopUrl() {
+  clearTimeout(shopUrlTimer);
+  shopUrlTimer = setTimeout(() => {
+    const u = new URLSearchParams();
+    if (ShopState.cat !== "all") u.set("cat", ShopState.cat);
+    if (ShopState.q) u.set("q", ShopState.q);
+    ShopState.kinds.forEach(v=>u.append("tur", v));
+    ShopState.sizes.forEach(v=>u.append("beden", v));
+    ShopState.colors.forEach(v=>u.append("renk", v));
+    ShopState.materials.forEach(v=>u.append("malzeme", v));
+    if (ShopState.maxPrice < ShopState.topPrice) u.set("fiyat", ShopState.maxPrice);
+    if (ShopState.sort !== "pop") u.set("sira", ShopState.sort);
+    const s = u.toString();
+    history.replaceState(null, "", s ? `${location.pathname}?${s}` : location.pathname);
+  }, 120);
+}
+function setCat(k, el) { ShopState.cat=k; document.querySelectorAll("[data-cat]").forEach(x=>{x.classList.remove("active"); x.querySelector("input").checked=false;}); el.classList.add("active"); el.querySelector("input").checked=true; renderShopHeading(); renderShop(); }
+function toggleKind(k, el) { const on=!ShopState.kinds.has(k); if (on) ShopState.kinds.add(k); else ShopState.kinds.delete(k); el.classList.toggle("active",on); el.querySelector("input").checked=on; renderShop(); }
 function toggleColor(c, el) { if (ShopState.colors.has(c)) ShopState.colors.delete(c); else ShopState.colors.add(c); el.classList.toggle("active"); renderShop(); }
 function toggleSize(z, el) { const on=!ShopState.sizes.has(z); if (on) ShopState.sizes.add(z); else ShopState.sizes.delete(z); el.classList.toggle("active",on); el.setAttribute("aria-pressed",on); renderShop(); }
 function toggleMaterial(m, el) { const on=!ShopState.materials.has(m); if (on) ShopState.materials.add(m); else ShopState.materials.delete(m); el.classList.toggle("active",on); el.querySelector("input").checked=on; renderShop(); }
@@ -354,6 +394,7 @@ function renderShop() {
   let list = PRODUCTS.slice();
   if (ShopState.cat!=="all" && ["kadin","erkek"].includes(ShopState.cat)) list = list.filter(p=>p.cat===ShopState.cat);
   if (ShopState.q) list = list.filter(p=>matchesSearch(p, ShopState.q));
+  if (ShopState.kinds.size) list = list.filter(p=>ShopState.kinds.has(kindOf(p)));
   if (ShopState.colors.size) list = list.filter(p=>p.colors.some(c=>ShopState.colors.has(c)));
   if (ShopState.sizes.size) list = list.filter(p=>p.sizes.some(z=>ShopState.sizes.has(z)));
   if (ShopState.materials.size) list = list.filter(p=>ShopState.materials.has(p.material));
@@ -364,6 +405,7 @@ function renderShop() {
   const count = document.getElementById("result-count");
   if (count) count.textContent = `${list.length} ürün bulundu`;
   grid.innerHTML = list.length ? list.map(productCard).join("") : `<div class="empty-state" style="grid-column:1/-1">${IC.bag}<h3>Ürün bulunamadı</h3><p>${ShopState.q ? "Aramanızla eşleşen ürün yok. Farklı bir kelime deneyin." : "Bu seçimde ürün yok. Filtreleri değiştirmeyi deneyin."}</p><a href="shop.html" class="btn btn-outline btn-sm">Tüm Ürünler</a></div>`;
+  syncShopUrl();
 }
 function toggleFilters(open){ document.querySelector(".filters")?.classList.toggle("open", open); document.querySelector(".scrim")?.classList.toggle("open", open); }
 
@@ -383,6 +425,22 @@ function initProduct() {
 
   renderPDP();
   renderRelated(p);
+  initStickyBuy();
+}
+function initStickyBuy() {
+  const bar = document.getElementById("pdp-sticky");
+  const target = document.querySelector(".pdp-actions");
+  if (!bar || !target || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(([e]) => {
+    // yalnızca düğme yukarıda kaldığında göster; henüz ulaşılmadıysa galeriyi kapatma
+    const show = !e.isIntersecting && e.boundingClientRect.top < window.innerHeight / 2;
+    bar.classList.toggle("show", show);
+    document.body.classList.toggle("has-sticky-buy", show);
+  }, { rootMargin: "-80px 0px 0px 0px" }).observe(target);
+}
+function pdpStickyAction() {
+  if (PDP.size) { pdpAddToCart(); return; }
+  document.getElementById("pdp-sizes").scrollIntoView({ behavior:"smooth", block:"center" });
 }
 function renderPDP() {
   const p = PDP.product;
@@ -395,6 +453,9 @@ function renderPDP() {
   const _r = pdpRating(p);
   document.getElementById("pdp-rating").innerHTML = `${starHTML(_r.rating)} <span>${_r.rating.toFixed(1)} · ${_r.count} değerlendirme</span>`;
   document.getElementById("pdp-price").innerHTML = `${p.old?`<span class="old">${TL(p.old)}</span>`:""}${TL(p.price)}`;
+  document.getElementById("pdp-sticky-name").textContent = p.name;
+  document.getElementById("pdp-sticky-price").textContent = TL(p.price);
+  document.getElementById("pdp-sticky-btn").textContent = PDP.size ? `Sepete Ekle · ${PDP.size}` : "Beden Seç";
   document.getElementById("pdp-desc").textContent = p.desc;
   document.getElementById("pdp-material").innerHTML = `<strong>${p.material}</strong> · ${LEATHER_TONES[PDP.color].name}`;
   document.getElementById("pdp-color-row").hidden = p.colors.length < 2;

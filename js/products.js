@@ -188,6 +188,10 @@ const SIZE_CHARTS = {
 };
 function chartOf(p) { return SIZE_CHARTS[p.chart] || SIZE_CHARTS[p.type] || SIZE_CHARTS.jacket; }
 
+/* Ürün türü: `chart` varsa o belirler, yoksa `type` (yer tutucu kalıbı) */
+const PRODUCT_KINDS = { jacket: "Ceket", coat: "Palto & Parka", vest: "Üst & Yelek", pantolon: "Pantolon", elbise: "Elbise", pelerin: "Pelerin", bag: "Çanta" };
+function kindOf(p) { return PRODUCT_KINDS[p.chart] ? p.chart : (PRODUCT_KINDS[p.type] ? p.type : "jacket"); }
+
 const CARE = {
   suet: ["Suyla silmeyin; tozu yumuşak süet fırçasıyla alın.", "Leke için bir deri uzmanına başvurun.", "Geniş askıda, plastik torba dışında saklayın."],
   deri: ["Nemli olmayan yumuşak bezle silin.", "Yılda bir iki kez deri kremiyle besleyin.", "Geniş askıda, plastik torba dışında saklayın."],
