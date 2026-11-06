@@ -80,7 +80,7 @@ function garmentSVG(type, toneKey, w = 800, h = 1000) {
     </g>
     <g filter="url(#grain${uid})" fill="url(#lea${uid})" stroke="none">${shape}</g>
     <g fill="url(#sheen${uid})" stroke="none">${shape}</g>
-    <text x="${w/2}" y="${h-46}" text-anchor="middle" font-family="Inter, sans-serif" font-size="21" letter-spacing="4" fill="#9a8f7d">UNDO · HAKİKİ DERİ</text>
+    <text x="${w/2}" y="${h-46}" text-anchor="middle" font-family="Inter, sans-serif" font-size="21" letter-spacing="4" fill="#9a8f7d">UNDO · ${tx("HAKİKİ DERİ")}</text>
   </svg>`;
 }
 
@@ -199,4 +199,4 @@ const CARE = {
 function careOf(p) { return /süet/i.test(p.material) ? CARE.suet : CARE.deri; }
 function hasFrontPhoto(p) { return !p.views || p.views.includes("on"); }
 
-const TL = n => "₺" + n.toLocaleString("tr-TR");
+const TL = n => "₺" + n.toLocaleString(currentLocale());

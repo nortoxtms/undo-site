@@ -104,14 +104,18 @@ const NAV = [
   { href: "about.html", label: "Hakkımızda" },
 ];
 
+function langSwitch() {
+  const btns = Object.keys(LANGS).map(k => `<button type="button" class="${k===LANG?'active':''}" aria-pressed="${k===LANG}" onclick="setLang('${k}')">${LANGS[k].label}</button>`).join("");
+  return `<div class="lang-switch" role="group" aria-label="Dil seçimi">${btns}</div>`;
+}
 function renderHeader(active) {
   if (document.body.dataset.page === "shop") {
     active = { kadin: "Kadın", erkek: "Erkek" }[qs("cat")] || "Tüm Ürünler";
   }
-  const links = NAV.map(n => `<a href="${n.href}" class="${active===n.label?'active':''}">${n.label}</a>`).join("");
+  const links = NAV.map(n => `<a href="${n.href}" data-label="${n.label}" class="${active===n.label?'active':''}">${n.label}</a>`).join("");
   const mlinks = NAV.map(n => `<a href="${n.href}">${n.label}</a>`).join("");
   const html = `
-  <div class="topbar">Türkiye'nin dört bir yanına ücretsiz ve sigortalı kargo · 35 yıllık ustalık</div>
+  <div class="topbar"><span>Türkiye'nin dört bir yanına ücretsiz ve sigortalı kargo · 35 yıllık ustalık</span>${langSwitch()}</div>
   <header class="site-header">
     <div class="wrap header-inner">
       <button class="menu-toggle" aria-label="Menü" onclick="toggleMenu(true)">${IC.menu}</button>
@@ -122,7 +126,7 @@ function renderHeader(active) {
       <div class="header-actions">
         <button class="icon-btn" type="button" aria-label="Ara" aria-expanded="false" id="search-toggle" onclick="toggleSearch()">${IC.search}</button>
         <a href="account.html?tab=favorites" class="icon-btn" aria-label="Favorilerim">${IC.heart}<span class="cart-count wish-count"></span></a>
-        <a href="account.html" class="icon-btn" aria-label="${Auth.isLoggedIn()?'Hesabım':'Giriş Yap'}" title="${Auth.isLoggedIn()?('Merhaba, '+Auth.current().name):'Giriş Yap'}">${IC.user}${Auth.isLoggedIn()?'<span class="acct-dot"></span>':''}</a>
+        <a href="account.html" class="icon-btn" aria-label="${Auth.isLoggedIn()?'Hesabım':'Giriş Yap'}" title="${Auth.isLoggedIn()?txf('Merhaba, {name}',{name:Auth.current().name}):'Giriş Yap'}">${IC.user}${Auth.isLoggedIn()?'<span class="acct-dot"></span>':''}</a>
         <a href="cart.html" class="icon-btn" aria-label="Sepet">${IC.bag}<span class="cart-count"></span></a>
       </div>
     </div>
@@ -138,6 +142,7 @@ function renderHeader(active) {
   <nav class="mobile-nav">
     <button class="close" onclick="toggleMenu(false)" aria-label="Kapat">${IC.close}</button>
     ${mlinks}
+    ${langSwitch()}
   </nav>`;
   const mount = document.getElementById("site-header");
   if (mount) mount.innerHTML = html;
@@ -296,7 +301,8 @@ const ShopState = { cat:"all", kinds:new Set(), colors:new Set(), materials:new 
 /* Türkçe karakter ve büyük/küçük harf farkını yok sayarak arama */
 function foldText(s) { return (s || "").toLocaleLowerCase("tr").replace(/ı/g, "i").normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
 function matchesSearch(p, q) {
-  const hay = foldText([p.name, p.material, ...p.colors.map(c => LEATHER_TONES[c].name)].join(" "));
+  const tones = p.colors.map(c => LEATHER_TONES[c].name);
+  const hay = foldText([p.name, tx(p.name), p.material, tx(p.material), tx(PRODUCT_KINDS[kindOf(p)]), ...tones, ...tones.map(tx)].join(" "));
   return foldText(q).split(/\s+/).filter(Boolean).every(w => hay.includes(w));
 }
 function initShop() {
@@ -357,14 +363,14 @@ function initShop() {
 }
 function renderShopHeading() {
   const titles = { all:"Tüm Ürünler", kadin:"Kadın Koleksiyonu", erkek:"Erkek Koleksiyonu" };
-  const heading = ShopState.q ? `“${ShopState.q}” için sonuçlar` : (titles[ShopState.cat] || "Koleksiyon");
+  const heading = ShopState.q ? txf("“{q}” için sonuçlar", { q: ShopState.q }) : tx(titles[ShopState.cat] || "Koleksiyon");
   document.title = `${heading} · UNDO`;
   const titleEl = document.getElementById("shop-title");
   const crumbEl = document.getElementById("shop-crumb");
   if (titleEl) titleEl.textContent = heading;
   if (crumbEl) crumbEl.textContent = heading;
   const navLabel = { kadin:"Kadın", erkek:"Erkek" }[ShopState.cat] || "Tüm Ürünler";
-  document.querySelectorAll(".main-nav a").forEach(a=>a.classList.toggle("active", a.textContent===navLabel));
+  document.querySelectorAll(".main-nav a").forEach(a=>a.classList.toggle("active", a.dataset.label===navLabel));
 }
 /* Kaydırıcı çok sık tetiklediği için adres kısa bir beklemeyle güncellenir */
 let shopUrlTimer = null;
@@ -403,7 +409,7 @@ function renderShop() {
   list.sort(sorters[ShopState.sort]||sorters.pop);
   const grid = document.getElementById("shop-grid");
   const count = document.getElementById("result-count");
-  if (count) count.textContent = `${list.length} ürün bulundu`;
+  if (count) count.textContent = txf("{n} ürün bulundu", { n: list.length });
   grid.innerHTML = list.length ? list.map(productCard).join("") : `<div class="empty-state" style="grid-column:1/-1">${IC.bag}<h3>Ürün bulunamadı</h3><p>${ShopState.q ? "Aramanızla eşleşen ürün yok. Farklı bir kelime deneyin." : "Bu seçimde ürün yok. Filtreleri değiştirmeyi deneyin."}</p><a href="shop.html" class="btn btn-outline btn-sm">Tüm Ürünler</a></div>`;
   syncShopUrl();
 }
@@ -417,7 +423,7 @@ function initProduct() {
   const id = qs("id") || PRODUCTS[0].id;
   const p = PRODUCTS.find(x=>x.id===id) || PRODUCTS[0];
   PDP.product = p; PDP.color = p.colors[0]; PDP.size = null; PDP.view = 0;
-  document.title = `${p.name} · UNDO`;
+  document.title = `${tx(p.name)} · UNDO`;
 
   document.getElementById("pdp-crumb").textContent = p.name;
   document.getElementById("pdp-crumb-cat").textContent = p.cat==="kadin"?"Kadın":p.cat==="erkek"?"Erkek":"Koleksiyon";
@@ -445,19 +451,19 @@ function pdpStickyAction() {
 function renderPDP() {
   const p = PDP.product;
   const shot = p.gallery[PDP.view] || p.gallery[0];
-  document.getElementById("pdp-main").innerHTML = `<button type="button" class="main-image-zoom" onclick="openLightbox()" aria-label="Görseli büyüt"><img src="${shot.src}" alt="${p.name} — ${shot.label}"><span class="zoom-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></span></button>`;
-  document.getElementById("pdp-thumbs").innerHTML = p.gallery.map((g,i)=>`<button type="button" class="${i===PDP.view?'active':''}" aria-label="${g.label} görünümü" ${i===PDP.view?'aria-current="true"':''} onclick="setView(${i})"><img src="${g.src}" alt=""></button>`).join("");
+  document.getElementById("pdp-main").innerHTML = `<button type="button" class="main-image-zoom" onclick="openLightbox()" aria-label="Görseli büyüt"><img src="${shot.src}" alt="${tx(p.name)} — ${tx(shot.label)}"><span class="zoom-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></span></button>`;
+  document.getElementById("pdp-thumbs").innerHTML = p.gallery.map((g,i)=>`<button type="button" class="${i===PDP.view?'active':''}" aria-label="${txf('{label} görünümü',{label:tx(g.label)})}" ${i===PDP.view?'aria-current="true"':''} onclick="setView(${i})"><img src="${g.src}" alt=""></button>`).join("");
   document.getElementById("pdp-thumbs").hidden = p.gallery.length < 2;
 
   document.getElementById("pdp-name").textContent = p.name;
   const _r = pdpRating(p);
-  document.getElementById("pdp-rating").innerHTML = `${starHTML(_r.rating)} <span>${_r.rating.toFixed(1)} · ${_r.count} değerlendirme</span>`;
+  document.getElementById("pdp-rating").innerHTML = `${starHTML(_r.rating)} <span>${txf("{rating} · {n} değerlendirme", { rating:_r.rating.toFixed(1), n:_r.count })}</span>`;
   document.getElementById("pdp-price").innerHTML = `${p.old?`<span class="old">${TL(p.old)}</span>`:""}${TL(p.price)}`;
   document.getElementById("pdp-sticky-name").textContent = p.name;
   document.getElementById("pdp-sticky-price").textContent = TL(p.price);
-  document.getElementById("pdp-sticky-btn").textContent = PDP.size ? `Sepete Ekle · ${PDP.size}` : "Beden Seç";
+  document.getElementById("pdp-sticky-btn").textContent = PDP.size ? txf("Sepete Ekle · {size}", { size:PDP.size }) : "Beden Seç";
   document.getElementById("pdp-desc").textContent = p.desc;
-  document.getElementById("pdp-material").innerHTML = `<strong>${p.material}</strong> · ${LEATHER_TONES[PDP.color].name}`;
+  document.getElementById("pdp-material").innerHTML = `<strong>${p.material}</strong> · ${tx(LEATHER_TONES[PDP.color].name)}`;
   document.getElementById("pdp-color-row").hidden = p.colors.length < 2;
   document.getElementById("pdp-colorname").textContent = LEATHER_TONES[PDP.color].name;
   document.getElementById("pdp-colors").innerHTML = p.colors.map(c=>`<button type="button" class="color-dot ${c===PDP.color?'active':''}" style="background:${LEATHER_TONES[c].hex}" title="${LEATHER_TONES[c].name}" aria-label="${LEATHER_TONES[c].name}" onclick="setColor('${c}')"></button>`).join("");
@@ -478,8 +484,8 @@ function renderPDP() {
   document.getElementById("sec-material").innerHTML = `
     <p>Her parça, alanında 35 yıllık deneyime sahip ustalarımız tarafından tek tek elden geçirilir. Kullandıkça yumuşayan ve size özel bir patina kazanan hakiki deri, yıllar boyu yanınızda kalır.</p>
     <ul>
-      <li>%100 Hakiki ${p.material}</li>
-      <li>Renk: ${LEATHER_TONES[PDP.color].name}</li>
+      <li>${txf("%100 Hakiki {material}", { material:tx(p.material) })}</li>
+      <li>${txf("Renk: {color}", { color:tx(LEATHER_TONES[PDP.color].name) })}</li>
       <li>El işçiliği ile üretim</li>
       <li>Astarlı iç yüzey</li>
       <li>Dayanıklı metal aksesuarlar</li>
@@ -490,7 +496,7 @@ function renderPDP() {
   const contact = document.getElementById("pdp-contact");
   contact.hidden = !CONTACT.whatsapp;
   if (CONTACT.whatsapp) {
-    const text = encodeURIComponent(`Merhaba, ${p.name} hakkında bilgi almak istiyorum.`);
+    const text = encodeURIComponent(txf("Merhaba, {name} hakkında bilgi almak istiyorum.", { name:tx(p.name) }));
     contact.innerHTML = `Bedeninizden emin değil misiniz? <a href="https://wa.me/${CONTACT.whatsapp}?text=${text}" target="_blank" rel="noopener">Bize yazın</a>`;
   }
 
@@ -516,7 +522,7 @@ function pdpToggleWish() { toggleWish(PDP.product.id); renderPDP(); }
 let REVIEW_DRAFT = 0;
 function starPicker(current) {
   let s = "";
-  for (let i = 1; i <= 5; i++) s += `<button type="button" class="star-pick ${i<=current?'on':''}" onclick="setReviewStar(${i})" aria-label="${i} yıldız">${i<=current?IC.star:IC.starE}</button>`;
+  for (let i = 1; i <= 5; i++) s += `<button type="button" class="star-pick ${i<=current?'on':''}" onclick="setReviewStar(${i})" aria-label="${txf('{n} yıldız',{n:i})}">${i<=current?IC.star:IC.starE}</button>`;
   return s;
 }
 function setReviewStar(v) { REVIEW_DRAFT = v; const el = document.getElementById("review-stars"); if (el) el.innerHTML = starPicker(v); }
@@ -541,7 +547,7 @@ function renderReviews(p) {
   const summary = `
     <div class="rev-summary">
       <div class="rev-big">${avg.toFixed(1)}</div>
-      <div>${starHTML(avg)}<div class="muted" style="font-size:13px;margin-top:4px">${list.length} kullanıcı değerlendirmesi</div></div>
+      <div>${starHTML(avg)}<div class="muted" style="font-size:13px;margin-top:4px">${txf("{n} kullanıcı değerlendirmesi", { n:list.length })}</div></div>
     </div>`;
 
   const form = `
@@ -585,8 +591,8 @@ function renderLightbox(){
   const g = PDP.product.gallery, shot = g[LB.index];
   const img = document.getElementById("lb-img");
   img.src = shot.src;
-  img.alt = `${PDP.product.name} — ${shot.label}`;
-  document.getElementById("lb-caption").textContent = g.length > 1 ? `${shot.label} · ${LB.index+1} / ${g.length}` : shot.label;
+  img.alt = `${tx(PDP.product.name)} — ${tx(shot.label)}`;
+  document.getElementById("lb-caption").textContent = g.length > 1 ? `${tx(shot.label)} · ${LB.index+1} / ${g.length}` : tx(shot.label);
   document.querySelectorAll("#lightbox .lb-nav").forEach(b => { b.hidden = g.length < 2; });
   LB.ox = LB.oy = 50;
   applyLightboxOrigin();
@@ -692,7 +698,7 @@ function pdpAddToCart(){
   const p = PDP.product;
   if (!PDP.size) { toast("Lütfen bir beden seçin"); document.getElementById("pdp-sizes").scrollIntoView({behavior:"smooth",block:"center"}); return; }
   Cart.add({ id:p.id, name:p.name, price:p.price, color:PDP.color, colorName:LEATHER_TONES[PDP.color].name, size:PDP.size, qty:1, img:p.images[PDP.color] });
-  toast(`${p.name} sepete eklendi`);
+  toast(txf("{name} sepete eklendi", { name:tx(p.name) }));
 }
 function renderRelated(p) {
   const mount = document.getElementById("pdp-related");
@@ -725,7 +731,7 @@ function renderCart() {
       <div class="cart-thumb"><img src="${i.img}" alt="${i.name}"></div>
       <div class="cart-detail">
         <h3>${i.name}</h3>
-        <div class="variant">Renk: ${i.colorName} · Beden: ${i.size}</div>
+        <div class="variant">${txf("Renk: {color} · Beden: {size}", { color:tx(i.colorName), size:i.size })}</div>
         <div class="row-controls">
           <div class="qty-stepper">
             <button onclick="cartQty(${idx},-1)" aria-label="Azalt">−</button>
@@ -771,7 +777,7 @@ function initCheckout() {
   linesMount.innerHTML = items.map(i=>`
     <div class="order-line">
       <div class="cart-thumb"><img src="${i.img}" alt="${i.name}"></div>
-      <div class="ol-info"><h4>${i.name}</h4><span>${i.colorName} · ${i.size} · ${i.qty} adet</span></div>
+      <div class="ol-info"><h4>${i.name}</h4><span>${txf("{color} · {size} · {n} adet", { color:tx(i.colorName), size:i.size, n:i.qty })}</span></div>
       <div class="ol-price">${TL(i.price*i.qty)}</div>
     </div>`).join("");
   renderSummary("checkout");
@@ -867,7 +873,7 @@ function authSubmit(e, mode) {
 function authProvider(provider) {
   const res = Auth.loginProvider(provider);
   if (!res.ok) { toast(res.error || "Giriş başarısız"); return; }
-  toast(provider + " ile giriş yapıldı (demo)");
+  toast(txf("{provider} ile giriş yapıldı (demo)", { provider }));
   afterLogin();
 }
 function afterLogin() {
@@ -889,7 +895,7 @@ function renderAccountShell(root, tab) {
   if (!ACCT_TABS.some(t=>t.key===tab)) tab = "profile";
   root.innerHTML = `
     <div class="account-head">
-      <div><span class="eyebrow">Hesabım</span><h1>Merhaba, ${u.name}</h1></div>
+      <div><span class="eyebrow">Hesabım</span><h1>${txf("Merhaba, {name}", { name:u.name })}</h1></div>
       <button class="btn btn-outline btn-sm" onclick="accountLogout()">Çıkış Yap</button>
     </div>
     <div class="account-layout">
@@ -921,7 +927,7 @@ function renderProfileTab(body) {
       <div class="field"><label>Adres</label><input type="text" name="address" value="${u.address||""}" placeholder="Teslimat adresiniz"></div>
       <button class="btn btn-solid" type="submit">Kaydet</button>
     </form>
-    <div class="account-meta">Üyelik türü: ${u.provider==="email"?"E-posta":u.provider} · Katılım: ${new Date(u.createdAt).toLocaleDateString("tr-TR")}</div>`;
+    <div class="account-meta">${txf("Üyelik türü: {type} · Katılım: {date}", { type:u.provider==="email"?tx("E-posta"):u.provider, date:new Date(u.createdAt).toLocaleDateString(currentLocale()) })}</div>`;
 }
 function saveProfile(e) {
   e.preventDefault();
@@ -933,29 +939,29 @@ function saveProfile(e) {
 }
 function renderFavoritesTab(body) {
   const prods = Wishlist.list().map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);
-  body.innerHTML = `<h2>Favorilerim (${prods.length})</h2>` + (prods.length
+  body.innerHTML = `<h2>${txf("Favorilerim ({n})", { n:prods.length })}</h2>` + (prods.length
     ? `<div class="product-grid cols-3">${prods.map(productCard).join("")}</div>`
     : `<div class="empty-state" style="padding:50px 20px">${IC.heart}<h3>Favori listeniz boş</h3><p>Beğendiğiniz ürünlerdeki kalbe dokunun, burada toplansın.</p><a href="shop.html" class="btn btn-solid">Ürünleri Keşfet</a></div>`);
 }
 function renderOrdersTab(body) {
   const orders = Orders.mine();
-  body.innerHTML = `<h2>Siparişlerim (${orders.length})</h2>` + (orders.length
+  body.innerHTML = `<h2>${txf("Siparişlerim ({n})", { n:orders.length })}</h2>` + (orders.length
     ? `<div class="order-list">${orders.map(orderCard).join("")}</div>`
     : `<div class="empty-state" style="padding:50px 20px">${IC.bag}<h3>Henüz siparişiniz yok</h3><p>İlk siparişinizi vermek için koleksiyonu keşfedin.</p><a href="shop.html" class="btn btn-solid">Alışverişe Başla</a></div>`);
 }
 function orderCard(o) {
   const st = Orders.status(o);
   const first = o.items[0] || {name:"—", img:""};
-  const more = o.items.length>1 ? ` +${o.items.length-1} ürün` : "";
+  const more = o.items.length>1 ? " " + txf("+{n} ürün", { n:o.items.length-1 }) : "";
   return `
     <div class="order-card">
       <div class="order-card-top">
-        <div><strong>${o.no}</strong><span class="muted"> · ${new Date(o.at).toLocaleDateString("tr-TR")}</span></div>
+        <div><strong>${o.no}</strong><span class="muted"> · ${new Date(o.at).toLocaleDateString(currentLocale())}</span></div>
         <span class="order-status s${st.step}">${st.label}</span>
       </div>
       <div class="order-card-body">
         <div class="order-thumbs">${o.items.slice(0,3).map(i=>`<img src="${i.img}" alt="">`).join("")}</div>
-        <div class="order-info"><p>${first.name}${more}</p><strong>${TL(o.total)}</strong></div>
+        <div class="order-info"><p>${tx(first.name)}${more}</p><strong>${TL(o.total)}</strong></div>
         <button class="btn btn-outline btn-sm" onclick="accountTrack('${o.no}')">Takip Et</button>
       </div>
     </div>`;
@@ -982,12 +988,12 @@ function trackOrder() {
   const result = document.getElementById("track-result");
   if (!no) { result.innerHTML = ""; return; }
   const o = Orders.find(no);
-  if (!o) { result.innerHTML = `<div class="track-empty">${IC.search}<p>«${no}» numaralı sipariş bulunamadı.</p></div>`; return; }
+  if (!o) { result.innerHTML = `<div class="track-empty">${IC.search}<p>${txf("«{no}» numaralı sipariş bulunamadı.", { no })}</p></div>`; return; }
   const st = Orders.status(o);
   result.innerHTML = `
     <div class="track-card">
       <div class="track-card-head">
-        <div><strong>${o.no}</strong><div class="muted">${new Date(o.at).toLocaleDateString("tr-TR")} · ${TL(o.total)}</div></div>
+        <div><strong>${o.no}</strong><div class="muted">${new Date(o.at).toLocaleDateString(currentLocale())} · ${TL(o.total)}</div></div>
         <span class="order-status s${st.step}">${st.label}</span>
       </div>
       <div class="timeline">
@@ -997,7 +1003,7 @@ function trackOrder() {
             <div class="tl-label">${s}</div>
           </div>`).join("")}
       </div>
-      <div class="track-items">${o.items.map(i=>`<div class="track-item"><img src="${i.img}" alt=""><span>${i.name} · ${i.colorName} · ${i.size} · ${i.qty} adet</span></div>`).join("")}</div>
+      <div class="track-items">${o.items.map(i=>`<div class="track-item"><img src="${i.img}" alt=""><span>${tx(i.name)} · ${txf("{color} · {size} · {n} adet", { color:tx(i.colorName), size:i.size, n:i.qty })}</span></div>`).join("")}</div>
     </div>`;
 }
 function accountLogout() {
