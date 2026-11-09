@@ -199,4 +199,5 @@ const CARE = {
 function careOf(p) { return /süet/i.test(p.material) ? CARE.suet : CARE.deri; }
 function hasFrontPhoto(p) { return !p.views || p.views.includes("on"); }
 
-const TL = n => "₺" + n.toLocaleString(currentLocale());
+/* TL cinsinden fiyatı seçili para biriminde yazar */
+const TL = n => formatMoney(priceIn(n));
