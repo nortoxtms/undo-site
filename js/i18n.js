@@ -52,6 +52,10 @@ const DICT = { en: {
   "Ürün ara": "Search products",
   "Ürün, renk veya malzeme ara…": "Search by product, colour or material…",
   "Dil seçimi": "Language",
+  "Para birimi": "Currency",
+  "ABD Doları": "US Dollar",
+  "İngiliz Sterlini": "British Pound",
+  "Türk Lirası": "Turkish Lira",
 
   /* ---- Alt bölüm ---- */
   "Ücretsiz Kargo": "Free Shipping",
@@ -153,8 +157,6 @@ const DICT = { en: {
   "Renk": "Colour",
   "Malzeme": "Material",
   "Fiyat": "Price",
-  "₺6.000": "₺6,000",
-  "₺25.000": "₺25,000",
   "Filtrele": "Filter",
   "Sırala": "Sort by",
   "Popüler": "Popular",
@@ -507,6 +509,35 @@ function txf(s, vars) {
   return (typeof v === "string" ? v : s).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
 }
 function currentLocale() { return LANGS[LANG].locale; }
+/* ---- Para birimi ----
+   Katalog fiyatları TL'dir. Diğer birimlerde fiyat sabit kurla çevrilir ve 5'e yuvarlanır;
+   sepet ve sipariş toplamları bu yuvarlanmış birim fiyatlardan hesaplanır.
+   Kur: TCMB döviz satış, 06.11.2026 bülteni. Güncellemek için yalnızca `rate` değerlerini değiştirin.
+   admin.html (data-i18n="off") hep TL gösterir. */
+const CURRENCIES = {
+  USD: { symbol: "$", name: "ABD Doları", rate: 50.0724 },
+  GBP: { symbol: "£", name: "İngiliz Sterlini", rate: 67.2010 },
+  TRY: { symbol: "₺", name: "Türk Lirası", rate: 1 },
+};
+const CURRENCY_KEY = "undo_currency";
+const CURRENCY = (() => {
+  if (document.documentElement.dataset.i18n === "off") return "TRY";
+  try { const s = localStorage.getItem(CURRENCY_KEY); return CURRENCIES[s] ? s : "USD"; } catch (e) { return "USD"; }
+})();
+/* TL tutarı seçili birime çevirir (birim fiyat için) */
+function priceIn(tl) {
+  const rate = CURRENCIES[CURRENCY].rate;
+  return rate === 1 ? tl : Math.round(tl / rate / 5) * 5;
+}
+/* Seçili birimdeki tutarı yazar: $280 · £205 · ₺13.900 */
+function formatMoney(n) {
+  return new Intl.NumberFormat(currentLocale(), { style: "currency", currency: CURRENCY, currencyDisplay: "narrowSymbol", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+}
+function setCurrency(code) {
+  if (!CURRENCIES[code] || code === CURRENCY) return;
+  try { localStorage.setItem(CURRENCY_KEY, code); } catch (e) { return; }
+  location.reload();
+}
 function setLang(code) {
   if (!LANGS[code] || code === LANG) return;
   try { localStorage.setItem(LANG_KEY, code); } catch (e) { return; }

@@ -56,6 +56,8 @@ const Cart = {
   remove(idx) { const items = this.read(); items.splice(idx, 1); this.write(items); },
   count() { return this.read().reduce((s,i)=>s+i.qty, 0); },
   subtotal() { return this.read().reduce((s,i)=>s + i.price*i.qty, 0); },
+  /* seçili para biriminde, satır fiyatlarıyla tutarlı toplam */
+  displayTotal(items) { return (items || this.read()).reduce((s,i)=>s + priceIn(i.price)*i.qty, 0); },
   clear() { this.write([]); },
 };
 
@@ -105,8 +107,9 @@ const NAV = [
 ];
 
 function langSwitch() {
-  const btns = Object.keys(LANGS).map(k => `<button type="button" class="${k===LANG?'active':''}" aria-pressed="${k===LANG}" onclick="setLang('${k}')">${LANGS[k].label}</button>`).join("");
-  return `<div class="lang-switch" role="group" aria-label="Dil seçimi">${btns}</div>`;
+  const langs = Object.keys(LANGS).map(k => `<button type="button" class="${k===LANG?'active':''}" aria-pressed="${k===LANG}" onclick="setLang('${k}')">${LANGS[k].label}</button>`).join("");
+  const curs = Object.keys(CURRENCIES).map(k => `<button type="button" class="${k===CURRENCY?'active':''}" aria-pressed="${k===CURRENCY}" aria-label="${CURRENCIES[k].name}" title="${CURRENCIES[k].name}" onclick="setCurrency('${k}')">${CURRENCIES[k].symbol}</button>`).join("");
+  return `<div class="locale-switch"><div class="lang-switch" role="group" aria-label="Dil seçimi">${langs}</div><span class="locale-sep" aria-hidden="true"></span><div class="lang-switch" role="group" aria-label="Para birimi">${curs}</div></div>`;
 }
 function renderHeader(active) {
   if (document.body.dataset.page === "shop") {
@@ -323,6 +326,8 @@ function initShop() {
   if (priceInput) { priceInput.max = Math.ceil(topPrice / 500) * 500; priceInput.value = ShopState.maxPrice < topPrice ? ShopState.maxPrice : priceInput.max; }
   const priceVal = document.getElementById("price-val");
   if (priceVal) priceVal.textContent = TL(+(priceInput ? priceInput.value : topPrice));
+  const priceMin = document.getElementById("price-min");
+  if (priceMin && priceInput) priceMin.textContent = TL(+priceInput.min);
 
   renderShopHeading();
 
@@ -741,20 +746,20 @@ function renderCart() {
           <button class="remove-btn" onclick="cartRemove(${idx})">${IC.trash} Kaldır</button>
         </div>
       </div>
-      <div class="line-price">${TL(i.price*i.qty)}</div>
+      <div class="line-price">${formatMoney(priceIn(i.price)*i.qty)}</div>
     </div>`).join("");
   renderSummary("cart");
 }
 function cartQty(idx,d){ const items=Cart.read(); Cart.setQty(idx,(items[idx].qty||1)+d); renderCart(); }
 function cartRemove(idx){ Cart.remove(idx); renderCart(); }
 function renderSummary(context) {
-  const sub = Cart.subtotal();
+  const sub = Cart.displayTotal();
   const el = document.getElementById(context+"-summary");
   if (!el) return;
   el.innerHTML = `
-    <div class="summary-row"><span>Ara Toplam</span><span>${TL(sub)}</span></div>
+    <div class="summary-row"><span>Ara Toplam</span><span>${formatMoney(sub)}</span></div>
     <div class="summary-row"><span>Kargo</span><span>${SHIP_COST===0?"Ücretsiz":TL(SHIP_COST)}</span></div>
-    <div class="summary-row total"><span>Toplam</span><span>${TL(sub+SHIP_COST)}</span></div>
+    <div class="summary-row total"><span>Toplam</span><span>${formatMoney(sub+priceIn(SHIP_COST))}</span></div>
     <div class="free-ship-note">${IC.truck} Ücretsiz ve sigortalı kargo</div>`;
 }
 
@@ -778,7 +783,7 @@ function initCheckout() {
     <div class="order-line">
       <div class="cart-thumb"><img src="${i.img}" alt="${i.name}"></div>
       <div class="ol-info"><h4>${i.name}</h4><span>${txf("{color} · {size} · {n} adet", { color:tx(i.colorName), size:i.size, n:i.qty })}</span></div>
-      <div class="ol-price">${TL(i.price*i.qty)}</div>
+      <div class="ol-price">${formatMoney(priceIn(i.price)*i.qty)}</div>
     </div>`).join("");
   renderSummary("checkout");
   // payment method toggle
@@ -961,7 +966,7 @@ function orderCard(o) {
       </div>
       <div class="order-card-body">
         <div class="order-thumbs">${o.items.slice(0,3).map(i=>`<img src="${i.img}" alt="">`).join("")}</div>
-        <div class="order-info"><p>${tx(first.name)}${more}</p><strong>${TL(o.total)}</strong></div>
+        <div class="order-info"><p>${tx(first.name)}${more}</p><strong>${formatMoney(Cart.displayTotal(o.items))}</strong></div>
         <button class="btn btn-outline btn-sm" onclick="accountTrack('${o.no}')">Takip Et</button>
       </div>
     </div>`;
@@ -993,7 +998,7 @@ function trackOrder() {
   result.innerHTML = `
     <div class="track-card">
       <div class="track-card-head">
-        <div><strong>${o.no}</strong><div class="muted">${new Date(o.at).toLocaleDateString(currentLocale())} · ${TL(o.total)}</div></div>
+        <div><strong>${o.no}</strong><div class="muted">${new Date(o.at).toLocaleDateString(currentLocale())} · ${formatMoney(Cart.displayTotal(o.items))}</div></div>
         <span class="order-status s${st.step}">${st.label}</span>
       </div>
       <div class="timeline">
